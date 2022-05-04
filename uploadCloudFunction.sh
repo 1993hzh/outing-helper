@@ -1,0 +1,1 @@
+"/Applications/wechatwebdevtools.app/Contents/MacOS/cli" cloud functions deploy --e cloud1-9ggmda0qb8fc88af --n quickstartFunctions --r --project "/Users/i322901/WeChatProjects/outing-helper" --report_first --report
