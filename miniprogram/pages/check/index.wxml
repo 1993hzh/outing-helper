@@ -1,0 +1,27 @@
+<van-toast id="van-toast" />
+<!-- scan part -->
+<view wx:if="{{!certificate}}">
+  <van-empty description="没有扫到二维码" />
+  <van-button round block type="primary" size="large" class="scan-button" icon="scan" bind:click="onClickScan">
+    扫一扫
+  </van-button>
+</view>
+<!-- records part -->
+<van-cell-group wx:for="{{certificate.outingRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
+  <van-cell value="内容" icon="records" use-label-slot="{{true}}" size="large">
+    <view slot="title">
+      <view class="van-cell-text"></view>
+      <van-tag hidden="{{item.check_type !== 0}}" type="danger">出</van-tag>
+      <van-tag hidden="{{item.check_type !== 1}}" type="success">进</van-tag>
+    </view>
+    <view slot="label">
+
+    </view>
+    <van-icon slot="right-icon" name="search" class="custom-icon" />
+  </van-cell>
+</van-cell-group>
+<!-- check part -->
+<view wx:if="{{certificate}}">
+  <van-button  round type="info" icon="manager" bind:click="onClickStart">进</van-button>
+  <van-button  round type="info" icon="manager" bind:click="onClickStart">出</van-button>
+</view>

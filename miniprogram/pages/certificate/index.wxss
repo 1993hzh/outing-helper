@@ -1,0 +1,14 @@
+.qrcode-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 750rpx;
+  height: 1200rpx;
+}
+
+.no-qrcode {
+  font-size: 100rpx;
+  font-weight: bold;
+  color: red;
+}

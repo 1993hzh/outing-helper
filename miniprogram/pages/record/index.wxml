@@ -1,0 +1,13 @@
+<van-cell-group wx:for="{{checkReocrds}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
+  <van-cell value="内容" icon="records" use-label-slot="{{true}}" size="large">
+    <view slot="title">
+      <view class="van-cell-text"></view>
+      <van-tag hidden="{{item.check_type !== 0}}" type="danger">出</van-tag>
+      <van-tag hidden="{{item.check_type !== 1}}" type="success">入</van-tag>
+    </view>
+    <view slot="label">
+
+    </view>
+    <van-icon slot="right-icon" name="search" class="custom-icon" />
+  </van-cell>
+</van-cell-group>
