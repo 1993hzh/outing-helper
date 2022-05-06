@@ -8,7 +8,6 @@ const certificateService = new CertificateService();
 const checkRecordService = new CheckRecordService();
 const residenceService = new ResidenceService();
 
-
 // 云函数入口函数
 exports.main = async (event, context) => {
   const service = event.service;
@@ -19,23 +18,33 @@ exports.main = async (event, context) => {
         return await buildingService.findByName(event.args);
       }
     case 'certificateService':
-      if (method === 'findByResidence') {
+      if (method === 'findById') {
+        return await certificateService.findById(event.args);
+      } else if (method === 'findByResidence') {
         return await certificateService.findByResidence(event.args);
       } else if (method === 'createQRcode') {
         return await certificateService.createQRcode(event.args);
+      } else if (method === 'checkIn') {
+        return await certificateService.checkIn(event.args);
+      } else if (method === 'checkOut') {
+        return await certificateService.checkOut(event.args);
       }
     case 'checkRecordService':
-      if (method === 'findByCertificate') {
+      if (method === 'findById') {
+        return await checkRecordService.findById(event.args);
+      } else if (method === 'findByCertificate') {
         return await checkRecordService.findByCertificate(event.args);
       }
     case 'residenceService':
-      if (method === 'create') {
+      if (method === 'findById') {
+        return await residenceService.findById(event.args);
+      } else if (method === 'create') {
         return await residenceService.create(...event.args);
       } else if (method === 'certify') {
         return await residenceService.certify(event.args);
       }
   }
 
-  console.error(`Found invalid function call: ${JSON.stringify(event)}, context: ${JSON.stringify(context)}`);
+  console.error(`Found invalid function call: ${JSON.stringify(event)}`);
   throw new Error(`Found invalid funtion call: ${service}.${method}`);
 };

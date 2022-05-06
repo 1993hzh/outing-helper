@@ -6,20 +6,21 @@ const cloud = require('wx-server-sdk');
 cloud.init({
   env: cloud.DYNAMIC_CURRENT_ENV
 });
-const wxContext = cloud.getWXContext();
 const db = cloud.database();
 const _ = db.command;
 
 class BaseService {
 
   #collection = undefined;
+  #database = undefined;
 
-  constructor(collection) {
+  constructor(collection, tx) {
     this.#collection = collection;
+    this.#database = tx ? tx : db;
   }
 
   async findById(_id) {
-    return db.collection(this.#collection).doc(_id).get()
+    return this.#database.collection(this.#collection).doc(_id).get()
       .then((response) => {
         let data = response.data;
         return this.transform(data);
@@ -28,10 +29,14 @@ class BaseService {
 
   // return created object
   async insert(record) {
+    const wxContext = cloud.getWXContext();
+
     record._id = nanoid();
     record.created_at = new Date();
     record.created_by = wxContext.OPENID;
-    return db.collection(this.#collection).add({ data: record })
+    record.updated_at = new Date();
+    record.updated_by = wxContext.OPENID;
+    return this.#database.collection(this.#collection).add({ data: record })
       .then(response => {
         console.info(`Insert record: ${JSON.stringify(record)} with response: ${JSON.stringify(response)}`);
         return this.transform(record);
@@ -39,37 +44,24 @@ class BaseService {
   }
 
   // return successfully updated counts
-  async update(record) {
-    record.updated_at = new Date();
-    record.updated_by = wxContext.OPENID;
-
-    console.debug(`Updating: ${JSON.stringify(record)}`);
-
-    const recordId = record._id;
-    if (!recordId) {
-      throw new Error(`Trying to update invalid record: ${JSON.stringify(record)}.`);
+  async update(expected, update) {
+    if (!expected._id || expected.revision < 0) {
+      throw new Error(`Trying to update invalid record: ${JSON.stringify(expected)}.`);
     }
 
-    delete record._id;
-    return db.collection(this.#collection).doc(recordId).update({ data: record });
-  }
-
-  // return successfully updated counts
-  async compareUpdate(expected, update) {
+    const wxContext = cloud.getWXContext();
     update.updated_at = new Date();
-    record.updated_by = wxContext.OPENID;
-
-    console.debug(`CompareUpdating: ${JSON.stringify(update)}`);
-
-    const recordId = update._id;
-    if (!recordId) {
-      throw new Error(`Trying to update invalid record: ${JSON.stringify(update)}.`);
-    }
-
-    delete update._id;
-    return db.collection(this.#collection)
-      .where(_.and([{ _id: recordId }, expected]))
-      .update({ data: update });
+    update.updated_by = wxContext.OPENID;
+    update.revision = expected.revision + 1;
+    console.info(`Updating, expected: ${JSON.stringify(expected)}, update: ${JSON.stringify(update)}`);
+    return this.#database.collection(this.#collection)
+      .where(expected)
+      .update({ data: update })
+      .then(response => {
+        if (response.stats.updated <= 0) {
+          throw new Error(`Update record: ${JSON.stringify(expected)} failed.`);
+        }
+      });
   }
 
   transform(jsonObject) {

@@ -1,5 +1,6 @@
 const BaseService = require('./baseService')
 const Certificate = require('./certificate')
+const CheckRecordService = require('./checkRecordService')
 
 const moment = require('moment')
 moment.locale('zh-CN');
@@ -10,13 +11,16 @@ cloud.init({
 });
 const db = cloud.database();
 const _ = db.command;
+const $ = _.aggregate;
 const COLLECTION_CERTIFICATE = 'certificate';
 const QR_CODE_TARGET_PAGE = 'pages/check/index';
+/* service */
+const checkRecordService = new CheckRecordService();
 
 class CertificateService extends BaseService {
 
-  constructor() {
-    super(COLLECTION_CERTIFICATE);
+  constructor(tx) {
+    super(COLLECTION_CERTIFICATE, tx);
   }
 
   transform(jsonObject) {
@@ -64,11 +68,7 @@ class CertificateService extends BaseService {
 
       let filePath = upload.fileID;
       certificate.qrcode_url = filePath;
-      const updateResult = await this.update(certificate);
-      if (updateResult <= 0) {
-        throw new Error(`Update certificate: ${certificate._id} with qrcode: ${filePath} failed.`);
-      }
-
+      await this.update({ _id: certificate._id, revision: certificate.revision }, { qrcode_url: filePath });
       return {
         success: true,
         data: certificate
@@ -79,6 +79,54 @@ class CertificateService extends BaseService {
         success: false,
         errorCode: error.errCode,
         errorMessage: error.errMsg
+      };
+    }
+  }
+
+  async checkIn(certificate) {
+    if (!certificate || !certificate._id) {
+      throw new Error(`Invalid certificate:${JSON.stringify(certificate)} to checkin.`);
+    }
+
+    const cert = new Certificate(certificate);
+    const checkRecord = cert.checkIn({});// user not implemented
+    return this.persist(cert, checkRecord);
+  }
+
+  async checkOut(certificate) {
+    if (!certificate || !certificate._id) {
+      throw new Error(`Invalid certificate:${JSON.stringify(certificate)} to checkout.`);
+    }
+
+    const cert = new Certificate(certificate);
+    const checkRecord = cert.checkOut({});// user not implemented
+    return this.persist(cert, checkRecord);
+  }
+
+  // private
+  async persist(certificate, checkRecord) {
+    const transaction = await db.startTransaction();
+    try {
+      const inserted = await new CheckRecordService(transaction).insert(checkRecord);
+      await this.update(
+        { _id: certificate._id, revision: certificate.revision },
+        { outing_count: certificate.outing_count }
+      );
+      await transaction.commit();
+      certificate.revision++;
+      return {
+        success: true,
+        data: {
+          certificate: certificate,
+          checkRecord: inserted
+        }
+      };
+    } catch (error) {
+      await transaction.rollback();
+      console.error(`certificate: ${JSON.stringify(certificate)} persist failed.`, error);
+      return {
+        success: false,
+        error: error
       };
     }
   }

@@ -32,6 +32,7 @@
     "downloadFile": 10000
   },
   "usingComponents": {
+    "van-tag": "@vant/weapp/tag/index",
     "van-button": "@vant/weapp/button/index",
     "van-icon": "@vant/weapp/icon/index",
     "van-image": "@vant/weapp/image/index",
@@ -40,7 +41,8 @@
     "van-cell": "@vant/weapp/cell/index",
     "van-cell-group": "@vant/weapp/cell-group/index",
     "van-toast": "@vant/weapp/toast/index",
-    "van-empty": "@vant/weapp/empty/index"
+    "van-empty": "@vant/weapp/empty/index",
+    "van-popup": "@vant/weapp/popup/index"
   },
   "useExtendedLib": {
     "weui": true

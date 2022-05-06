@@ -1,31 +1,22 @@
 // pages/check/index.js
 import * as logger from '../../utils/log';
-import CertificateService from '../../core/certificateService';
 import Toast from '@vant/weapp/toast/toast';
 
 const app = getApp();
-const certificateService = new CertificateService();
 
 Page({
 
   data: {
+    showCheckPopup: false,
     certificate: undefined,
+    checkRecords: []
   },
 
   onLoad(options) {
     // const certId = options.id;
-    const certId = 'J_NlSuiOPOfmzWA0EQIbb';
+    const certId = 'wxpkz9dCoabo3V81tC8UA';
     if (certId) {
-      certificateService.findById(certId)
-        .then((resp) => {
-          let data = resp.data;
-          logger.debug(`Find certificate by id: ${certId} returned: ${JSON.stringify(data)}`);
-          this.setData({ certificate: data })
-        })
-        .catch((error) => {
-          logger.error(`Find certificate by id: ${certId} failed with: ${JSON.stringify(error)}`);
-          Toast.fail('加载出行证出错，请联系管理员');
-        });
+      this.loadData(certId);
     }
   },
 
@@ -49,5 +40,98 @@ Page({
         logger.error(err);
         Toast.fail('二维码扫描出错，请重试。');
       });
+  },
+
+  onClickCheckIn(event) {
+    wx.cloud.callFunction({
+      name: 'outingFunctions',
+      data: {
+        service: 'certificateService',
+        method: 'checkIn',
+        args: this.data.certificate
+      }
+    }).then((resp) => {
+      const result = resp.result.data;
+      const checkRecords = this.data.checkRecords;
+      checkRecords.push(result.checkRecord);
+      this.setData({
+        certificate: result.certificate,
+        checkRecords: this.processCheckRecord(checkRecords)
+      });
+    }).catch((err) => {
+      logger.error(JSON.stringify(err));
+      Toast.fail('检入发生错误，请联系管理员');
+    });
+  },
+
+  onClickCheckOut(event) {
+    wx.cloud.callFunction({
+      name: 'outingFunctions',
+      data: {
+        service: 'certificateService',
+        method: 'checkOut',
+        args: this.data.certificate
+      }
+    }).then((resp) => {
+      const result = resp.result.data;
+      const checkRecords = this.data.checkRecords;
+      checkRecords.push(result.checkRecord);
+      this.setData({
+        certificate: result.certificate,
+        checkRecords: this.processCheckRecord(checkRecords)
+      });
+    }).catch((err) => {
+      logger.error(JSON.stringify(err));
+      Toast.fail('检出发生错误，请联系管理员');
+    });
+  },
+
+  onClosePopup() {
+    this.setData({ showCheckPopup: false });
+  },
+
+  loadData(certId) {
+    wx.cloud.callFunction({
+      name: 'outingFunctions',
+      data: {
+        service: 'certificateService',
+        method: 'findById',
+        args: certId
+      }
+    }).then((resp) => {
+      let data = resp.result;
+      logger.info(`Find certificate by id: ${certId} returned: ${JSON.stringify(data)}`);
+      this.setData({
+        certificate: data
+      });
+    }).then((resp) => {
+      return wx.cloud.callFunction({
+        name: 'outingFunctions',
+        data: {
+          service: 'checkRecordService',
+          method: 'findByCertificate',
+          args: certId
+        }
+      });
+    }).then((resp) => {
+      let data = resp.result.data;
+      logger.info(`Find checkRecord by certId: ${certId} returned: ${JSON.stringify(data)}`);
+      this.setData({
+        checkRecords: this.processCheckRecord(data),
+        showCheckPopup: true
+      });
+    }).catch((error) => {
+      logger.error(`check load by id: ${certId} failed with: ${JSON.stringify(error)}`);
+      Toast.fail('加载出错，请联系管理员');
+    });
+  },
+
+  processCheckRecord(records) {
+    records.forEach(e => {
+      if (!e.displayDateTime) {
+        e.displayDateTime = new Date(e.created_at).toLocaleString('zh-CN');
+      }
+    });
+    return records;
   }
 })

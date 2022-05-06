@@ -1,5 +1,14 @@
 /* pages/check/index.wxss */
-/* .scan-button {
-  width: 200rpx;
-  height: 50rpx;
-} */
+.check-button {
+    width: 240rpx;
+    height: 100rpx;
+    margin: 50rpx;
+    font-size: 32rpx;
+}
+
+.check-button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}

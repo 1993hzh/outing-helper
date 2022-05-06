@@ -3,16 +3,11 @@ class User {
   _id = undefined;
   name = '';
   wx_open_id = '';
-  residence_id = '';
   contact_number = '';
   status = 0;
-  
   certificate = {
     id: '',
-    qrcode_url: '',
-    requested_at: undefined,
-    approved_by: '',
-    approved_at: undefined,
+    qrcode_url: ''
   };
 
   managed_buildings = {

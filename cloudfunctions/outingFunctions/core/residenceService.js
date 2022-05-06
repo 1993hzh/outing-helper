@@ -19,8 +19,8 @@ const certificateService = new CertificateService();
 
 class ResidenceService extends BaseService {
 
-  constructor() {
-    super(COLLECTION_RESIDENCE);
+  constructor(tx) {
+    super(COLLECTION_RESIDENCE, tx);
   }
 
   async find(residence) {

@@ -1,27 +1,29 @@
 <van-toast id="van-toast" />
 <!-- scan part -->
-<view wx:if="{{!certificate}}">
-  <van-empty description="没有扫到二维码" />
-  <van-button round block type="primary" size="large" class="scan-button" icon="scan" bind:click="onClickScan">
-    扫一扫
-  </van-button>
+<view>
+    <van-empty description="扫描出行证二维码" />
+    <van-button round block type="primary" size="large" class="scan-button" icon="scan" bind:click="onClickScan">
+        扫一扫
+    </van-button>
 </view>
-<!-- records part -->
-<van-cell-group wx:for="{{certificate.outingRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
-  <van-cell value="内容" icon="records" use-label-slot="{{true}}" size="large">
-    <view slot="title">
-      <view class="van-cell-text"></view>
-      <van-tag hidden="{{item.check_type !== 0}}" type="danger">出</van-tag>
-      <van-tag hidden="{{item.check_type !== 1}}" type="success">进</van-tag>
+<van-popup show="{{ showCheckPopup }}" bind:close="onClosePopup" position="top" safe-area-inset-top="{{true}}" custom-style="height: 60%;">
+    <!-- records part -->
+    <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
+        <van-cell center value="{{item.displayDateTime}}" use-label-slot="{{true}}" size="large">
+            <view slot="title">
+                <van-tag wx:if="{{item.check_type === 0}}" type="danger">出</van-tag>
+                <van-tag wx:if="{{item.check_type === 1}}" type="success">进</van-tag>
+                {{item.user.name}}
+            </view>
+            <view slot="label">
+                {{item.user.residence.building.name + item.user.residence.room}}
+            </view>
+            <van-icon slot="right-icon" name="clock-o"/>
+        </van-cell>
+    </van-cell-group>
+    <!-- check part -->
+    <view wx:if="{{certificate}}" class="check-button-container">
+        <van-button custom-class="check-button" round type="primary" icon="clock" bind:click="onClickCheckIn">进</van-button>
+        <van-button custom-class="check-button" round type="danger" icon="volume" bind:click="onClickCheckOut">出</van-button>
     </view>
-    <view slot="label">
-
-    </view>
-    <van-icon slot="right-icon" name="search" class="custom-icon" />
-  </van-cell>
-</van-cell-group>
-<!-- check part -->
-<view wx:if="{{certificate}}">
-  <van-button  round type="info" icon="manager" bind:click="onClickStart">进</van-button>
-  <van-button  round type="info" icon="manager" bind:click="onClickStart">出</van-button>
-</view>
+</van-popup>

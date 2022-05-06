@@ -14,7 +14,7 @@ Component({
       {
         name: 'record',
         url: "/pages/record/index",
-        icon: "notes-o",
+        icon: "records",
         info: 5,
         text: "出行记录",
         hide: false
