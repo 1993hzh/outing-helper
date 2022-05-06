@@ -68,13 +68,13 @@ class CertificateService extends BaseService {
 
       let filePath = upload.fileID;
       certificate.qrcode_url = filePath;
-      await this.update({ _id: certificate._id, revision: certificate.revision }, { qrcode_url: filePath });
+      await this.update(certificate, { qrcode_url: filePath });
       return {
         success: true,
         data: certificate
       }
     } catch (error) {
-      console.error(JSON.stringify(error));
+      console.error(`create QR code for certificate: ${JSON.stringify(certificate)} failed.`, error);
       return {
         success: false,
         errorCode: error.errCode,
@@ -108,12 +108,8 @@ class CertificateService extends BaseService {
     const transaction = await db.startTransaction();
     try {
       const inserted = await new CheckRecordService(transaction).insert(checkRecord);
-      await this.update(
-        { _id: certificate._id, revision: certificate.revision },
-        { outing_count: certificate.outing_count }
-      );
+      await this.update(certificate, { outing_count: certificate.outing_count });
       await transaction.commit();
-      certificate.revision++;
       return {
         success: true,
         data: {

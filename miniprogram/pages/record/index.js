@@ -36,6 +36,7 @@ Page({
       return;
     }
 
+    Toast.loading({ message: '加载中...', forbidClick: true, });
     wx.cloud.callFunction({
       name: 'outingFunctions',
       data: {
@@ -50,6 +51,8 @@ Page({
         checkRecords: this.processCheckRecord(data),
         isRefreshing: false
       });
+
+      Toast.clear();
     }).catch((error) => {
       logger.error(`check load by id: ${certId} failed with: ${JSON.stringify(error)}`);
       Toast.fail('加载出错，请联系管理员');

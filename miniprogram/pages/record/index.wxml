@@ -1,4 +1,5 @@
 <van-toast id="van-toast" />
+
 <view wx:if="{{checkRecords.length <= 0}}">
   <van-empty description="暂无出行记录" />
 </view>

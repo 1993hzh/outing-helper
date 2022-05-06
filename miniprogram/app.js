@@ -16,14 +16,18 @@ App({
         env: envList[0],
         traceUser: true,
       });
+
+      this.doLogin();
     }
   },
 
-  onShow: function () {
+  doLogin: function () {
+    //TODO     this.getTabBar().updateCheckRecord();
+  },
 
+  onShow: function () {
   },
 
   onHide: function () {
-
   }
 });

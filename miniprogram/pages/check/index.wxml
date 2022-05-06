@@ -23,7 +23,7 @@
     </van-cell-group>
     <!-- check part -->
     <view wx:if="{{certificate}}" class="check-button-container">
-        <van-button custom-class="check-button" round type="primary" icon="clock" bind:click="onClickCheckIn">进</van-button>
-        <van-button custom-class="check-button" round type="danger" icon="volume" bind:click="onClickCheckOut">出</van-button>
+        <van-button custom-class="check-button" round type="primary" icon="wap-home" bind:click="onClickCheckIn">进</van-button>
+        <van-button custom-class="check-button" round type="danger" icon="shopping-cart" bind:click="onClickCheckOut">出</van-button>
     </view>
 </van-popup>

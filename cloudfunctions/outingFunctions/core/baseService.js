@@ -44,24 +44,30 @@ class BaseService {
   }
 
   // return successfully updated counts
-  async update(expected, update) {
-    if (!expected._id || expected.revision < 0) {
-      throw new Error(`Trying to update invalid record: ${JSON.stringify(expected)}.`);
+  async update(record, partial) {
+    if (!record._id || record.revision < 0) {
+      throw new Error(`Trying to update invalid record: ${JSON.stringify(record)}.`);
     }
 
-    const wxContext = cloud.getWXContext();
-    update.updated_at = new Date();
-    update.updated_by = wxContext.OPENID;
-    update.revision = expected.revision + 1;
-    console.info(`Updating, expected: ${JSON.stringify(expected)}, update: ${JSON.stringify(update)}`);
+    partial.updated_at = new Date();
+    partial.updated_by = cloud.getWXContext().OPENID;
+    partial.revision = record.revision + 1;
+    console.info(`Updating, record: ${JSON.stringify(record)}, update: ${JSON.stringify(partial)}`);
     return this.#database.collection(this.#collection)
-      .where(expected)
-      .update({ data: update })
+      .where({ _id: record._id, revision: record.revision })
+      .update({ data: partial })
       .then(response => {
         if (response.stats.updated <= 0) {
-          throw new Error(`Update record: ${JSON.stringify(expected)} failed.`);
+          throw new Error(`Update record: ${JSON.stringify(record)} failed.`);
         }
+
+        record.revision++;
+        return response;
       });
+  }
+
+  async delete(record) {
+    return this.update(record, { status: -1 });
   }
 
   transform(jsonObject) {

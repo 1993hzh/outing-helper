@@ -15,7 +15,7 @@ Component({
         name: 'record',
         url: "/pages/record/index",
         icon: "records",
-        info: 5,
+        info: 0,
         text: "出行记录",
         hide: false
       },
@@ -38,9 +38,6 @@ Component({
       wx.switchTab({
         url: this.data.list[event.detail].url
       })
-      // this.setData({
-      //   active: event.detail
-      // });
     },
 
     init() {
@@ -48,6 +45,12 @@ Component({
       this.setData({
         active: this.data.list.findIndex(item => item.url === `/${page.route}`)
       });
+    },
+
+    updateCheckRecord(count) {
+      this.setData({
+        ['list[1].info']: count
+      })
     }
   }
 })

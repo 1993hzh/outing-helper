@@ -43,6 +43,8 @@ Page({
   },
 
   onClickCheckIn(event) {
+    Toast.loading({ message: '检入中，请稍后...', forbidClick: true, });
+
     wx.cloud.callFunction({
       name: 'outingFunctions',
       data: {
@@ -58,6 +60,8 @@ Page({
         certificate: result.certificate,
         checkRecords: this.processCheckRecord(checkRecords)
       });
+
+      Toast.clear();
     }).catch((err) => {
       logger.error(JSON.stringify(err));
       Toast.fail('检入发生错误，请联系管理员');
@@ -65,6 +69,8 @@ Page({
   },
 
   onClickCheckOut(event) {
+    Toast.loading({ message: '检出中，请稍后...', forbidClick: true, });
+
     wx.cloud.callFunction({
       name: 'outingFunctions',
       data: {
@@ -80,6 +86,8 @@ Page({
         certificate: result.certificate,
         checkRecords: this.processCheckRecord(checkRecords)
       });
+
+      Toast.clear();
     }).catch((err) => {
       logger.error(JSON.stringify(err));
       Toast.fail('检出发生错误，请联系管理员');
@@ -87,10 +95,16 @@ Page({
   },
 
   onClosePopup() {
-    this.setData({ showCheckPopup: false });
+    this.setData({
+      showCheckPopup: false,
+      certificate: undefined,
+      checkRecords: []
+    });
   },
 
   loadData(certId) {
+    Toast.loading({ message: '正在加载...', forbidClick: true, });
+
     wx.cloud.callFunction({
       name: 'outingFunctions',
       data: {
@@ -120,6 +134,8 @@ Page({
         checkRecords: this.processCheckRecord(data),
         showCheckPopup: true
       });
+
+      Toast.clear();
     }).catch((error) => {
       logger.error(`check load by id: ${certId} failed with: ${JSON.stringify(error)}`);
       Toast.fail('加载出错，请联系管理员');
