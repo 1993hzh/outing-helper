@@ -154,6 +154,6 @@ Page({
       return;
     }
 
-    
+    const loginUser = app.globalData.loginUser;
   },
 })

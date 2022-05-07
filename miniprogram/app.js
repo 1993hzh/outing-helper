@@ -1,11 +1,10 @@
 // app.js
 const { envList } = require('./envList.js');
+import * as logger from './utils/log';
 
 App({
   globalData: {
-    loginUser: {
-
-    }
+    loginUser: {}
   },
 
   onLaunch: function () {
@@ -17,17 +16,49 @@ App({
         traceUser: true,
       });
 
-      this.doLogin();
+      this.userLogin();
     }
   },
 
-  doLogin: function () {
-    //TODO     this.getTabBar().updateCheckRecord();
+  userLogin() {
+    return wx.cloud.callFunction({
+      name: 'outingFunctions',
+      data: {
+        service: 'userService',
+        method: 'login',
+      }
+    }).then((resp) => {
+      const user = resp.result?.data;
+      if (!user) {
+        throw new Error(`User login failed with no db data.`);
+      }
+
+      logger.info(`User: ${JSON.stringify(user)} login succeed.`);
+      this.globalData.loginUser = user;
+      return user;
+    }).catch((err) => {
+      logger.error(`User login failed.`, err);
+    });
+  },
+
+  watchUserLogin: function (callback) {
+    const globalData = this.globalData;
+    Object.defineProperty(globalData, "loginUser", {
+      configurable: true,
+      enumerable: true,
+      set(value) {
+        this._user = value;
+        callback(value);
+      },
+      get() {
+        return this._user
+      }
+    })
   },
 
   onShow: function () {
   },
 
   onHide: function () {
-  }
+  },
 });

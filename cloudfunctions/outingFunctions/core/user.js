@@ -10,9 +10,9 @@ class User {
     room: undefined
   };
   certificate = {
-    id: '',
-    qrcode_url: ''
+    id: undefined
   };
+  check_points = {};
   managed_buildings = {};
   status = 0;// -1: deleted, 0: valid
   revision = 0;

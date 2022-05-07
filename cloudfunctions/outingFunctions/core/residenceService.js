@@ -52,11 +52,12 @@ class ResidenceService extends BaseService {
       },
       orderBy: [],
       limit: 1
-    }).then((response) => {
-      let exists = response.data;
+    }).then((result) => {
+      let exists = result.data;
       if (exists && exists.length > 0) {
         console.info(`Return existing Residence: ${JSON.stringify(exists)}`);
-        return exists[0];
+        result.data = exists[0];
+        return result;
       }
 
       console.info(`Inserting Residence: ${JSON.stringify(residence)}`);
@@ -79,7 +80,8 @@ class ResidenceService extends BaseService {
     };
 
     return certificateService.insert(certificate)
-      .then((cert) => {
+      .then((result) => {
+        const cert = result.data;
         console.info(`Successfully certified: ${JSON.stringify(cert)}`);
         return certificateService.createQRcode(cert);
       });

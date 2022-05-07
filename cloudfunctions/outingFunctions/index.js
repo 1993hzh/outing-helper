@@ -52,8 +52,6 @@ exports.main = async (event, context) => {
     case 'userService':
       if (method === 'login') {
         return await userService.login();
-      } else if (method === 'create') {
-        return await userService.create(event.args);
       } else if (method === 'register') {
         return await userService.register(...event.args);
       } else if (method === 'bindCertificate') {

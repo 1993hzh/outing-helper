@@ -17,7 +17,7 @@ class Certificate {
     room: undefined
   };
   qrcode_url = undefined;
-  status = 0;// -1: deleted, 0: valid, 1: invalid
+  status = 1;// -1: deleted, 1: valid, 0: invalid
   revision = 0;
   created_at = undefined;
   created_by = undefined;

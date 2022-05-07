@@ -10,5 +10,11 @@
 .no-qrcode {
   font-size: 100rpx;
   font-weight: bold;
-  color: red;
+  color: #ed3f14;
+}
+
+.invalid-qrcode {
+  font-size: 100rpx;
+  font-weight: bold;
+  color: #ff9900;
 }

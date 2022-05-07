@@ -40,12 +40,12 @@ Page({
       })
       .catch((err) => {
         logger.error(err);
-        Toast.fail('二维码扫描出错，请重试。');
+        Toast.fail({ message: '二维码扫描出错，请重试。', zIndex: 999999, });
       });
   },
 
   onClickCheckIn(event) {
-    Toast.loading({ message: '检入中，请稍后...', forbidClick: true, });
+    Toast.loading({ message: '检入中，请稍后...', forbidClick: true, zIndex: 999999, });
 
     wx.cloud.callFunction({
       name: 'outingFunctions',
@@ -55,23 +55,23 @@ Page({
         args: this.data.certificate
       }
     }).then((resp) => {
-      const result = resp.result.data;
-      const checkRecords = this.data.checkRecords;
-      checkRecords.push(result.checkRecord);
+      const data = resp.result.data;
+      const processedCheckRecord = this.processCheckRecord(data.checkRecord);
+      this.data.checkRecords.push(processedCheckRecord);
       this.setData({
-        certificate: result.certificate,
-        checkRecords: this.processCheckRecord(checkRecords)
+        certificate: data.certificate,
+        checkRecords: this.data.checkRecords
       });
 
       Toast.clear();
     }).catch((err) => {
       logger.error(JSON.stringify(err));
-      Toast.fail('检入发生错误，请联系管理员');
+      Toast.fail({ message: '检入发生错误，请联系管理员', zIndex: 999999, });
     });
   },
 
   onClickCheckOut(event) {
-    Toast.loading({ message: '检出中，请稍后...', forbidClick: true, });
+    Toast.loading({ message: '检出中，请稍后...', forbidClick: true, zIndex: 999999, });
 
     wx.cloud.callFunction({
       name: 'outingFunctions',
@@ -81,18 +81,18 @@ Page({
         args: this.data.certificate
       }
     }).then((resp) => {
-      const result = resp.result.data;
-      const checkRecords = this.data.checkRecords;
-      checkRecords.push(result.checkRecord);
+      const data = resp.result.data;
+      const processedCheckRecord = this.processCheckRecord(data.checkRecord);
+      this.data.checkRecords.push(processedCheckRecord);
       this.setData({
-        certificate: result.certificate,
-        checkRecords: this.processCheckRecord(checkRecords)
+        certificate: data.certificate,
+        checkRecords: this.data.checkRecords
       });
 
       Toast.clear();
     }).catch((err) => {
       logger.error(JSON.stringify(err));
-      Toast.fail('检出发生错误，请联系管理员');
+      Toast.fail({ message: '检出发生错误，请联系管理员', zIndex: 999999, });
     });
   },
 
@@ -105,7 +105,7 @@ Page({
   },
 
   loadData(certId) {
-    Toast.loading({ message: '正在加载...', forbidClick: true, });
+    Toast.loading({ message: '正在加载...', forbidClick: true, zIndex: 999999, });
 
     wx.cloud.callFunction({
       name: 'outingFunctions',
@@ -115,7 +115,7 @@ Page({
         args: certId
       }
     }).then((resp) => {
-      let data = resp.result;
+      let data = resp.result.data;
       logger.info(`Find certificate by id: ${certId} returned: ${JSON.stringify(data)}`);
       this.setData({
         certificate: data
@@ -130,26 +130,25 @@ Page({
         }
       });
     }).then((resp) => {
-      let data = resp.result.data;
+      const data = resp.result.data;
+      const displayData = data.map(e => this.processCheckRecord(e));
       logger.info(`Find checkRecord by certId: ${certId} returned: ${JSON.stringify(data)}`);
       this.setData({
-        checkRecords: this.processCheckRecord(data),
+        checkRecords: displayData,
         showCheckPopup: true
       });
 
       Toast.clear();
     }).catch((error) => {
       logger.error(`check load by id: ${certId} failed with: ${JSON.stringify(error)}`);
-      Toast.fail('加载出错，请联系管理员');
+      Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
     });
   },
 
-  processCheckRecord(records) {
-    records.forEach(e => {
-      if (!e.displayDateTime) {
-        e.displayDateTime = new Date(e.created_at).toLocaleString('zh-CN');
-      }
-    });
-    return records;
+  processCheckRecord(record) {
+    if (record && !record.displayDateTime) {
+      record.displayDateTime = new Date(record.created_at).toLocaleString('zh-CN');
+    }
+    return record;
   }
 })

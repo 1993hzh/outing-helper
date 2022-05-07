@@ -37,6 +37,13 @@ class UserService extends BaseService {
         { prop: 'created_at', type: 'desc' }
       ],
       limit: 1
+    }).then((result) => {
+      if (result.data.length > 0) {
+        result.data = result.data[0];
+        return result;
+      } else {
+        return this.create();
+      }
     });
   }
 

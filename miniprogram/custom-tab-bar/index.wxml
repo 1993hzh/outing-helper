@@ -1,6 +1,7 @@
 <view class="view-container">
   <van-tabbar active="{{ active }}" bind:change="onChange">
-    <van-tabbar-item wx:if="{{!item.hide}}" wx:for="{{list}}" wx:key="index" icon="{{item.icon}}" info="{{item.info}}">
+    <van-tabbar-item wx:if="{{!item.hide}}" wx:for="{{list}}" wx:key="index"
+      name="{{item.name}}" icon="{{item.icon}}" info="{{item.info}}" dot="{{item.dot}}">
       {{item.text}}
     </van-tabbar-item>
   </van-tabbar>

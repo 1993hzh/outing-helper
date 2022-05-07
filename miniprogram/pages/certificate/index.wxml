@@ -1,7 +1,19 @@
 <!--pages/certificate/index.wxml-->
 <view class="qrcode-container">
-  <text wx:if="{{!hasQRcode}}" class="no-qrcode">无通行证</text>
-  <van-image wx:if="{{hasQRcode}}" use-error-slot src="{{codeSrc}}" fit="contain" width="750rpx" height="750rpx">
-    <text slot="error" vertical>加载失败</text>
-  </van-image>
+  <view wx:if="{{!certificate.qrcode_url}}" class="no-qrcode">
+    <van-empty class="custom-image" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="无出行证">
+      <van-button round plain type="info" class="bottom-button" bind:click="onClickRegisterUser">去完善信息</van-button>
+    </van-empty>
+  </view>
+  <view wx:if="{{certificate.qrcode_url}}">
+    <view wx:if="{{certificate.status === 1}}">
+      <van-image use-error-slot use-loading-slot src="{{certificate.qrcode_url}}" fit="contain" width="750rpx" height="750rpx">
+        <text slot="error" vertical>加载失败</text>
+        <van-loading slot="loading" type="spinner" vertical />
+      </van-image>
+    </view>
+    <view wx:else>
+      <van-empty image="error" description="出行证被停用" />
+    </view>
+  </view>
 </view>

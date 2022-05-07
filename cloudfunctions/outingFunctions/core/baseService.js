@@ -21,9 +21,10 @@ class BaseService {
 
   async findById(_id) {
     return this.#database.collection(this.#collection).doc(_id).get()
-      .then((response) => {
-        let data = response.data;
-        return this.transform(data);
+      .then((result) => {
+        const data = result.data;
+        result.data = this.transform(data);
+        return result;
       });
   }
 
@@ -42,11 +43,10 @@ class BaseService {
       query.limit(limit);
     }
     return query.get()
-      .then((response) => {
-        if (response.data) {
-          response.data = response.data.map(e => this.transform(e));
-        }
-        return response;
+      .then((result) => {
+        const data = result.data;
+        result.data = data.map(e => this.transform(e));
+        return result;
       });
   }
 
@@ -60,9 +60,10 @@ class BaseService {
     record.updated_at = new Date();
     record.updated_by = wxContext.OPENID;
     return this.#database.collection(this.#collection).add({ data: record })
-      .then(response => {
-        console.info(`Insert record: ${JSON.stringify(record)} with response: ${JSON.stringify(response)}`);
-        return this.transform(record);
+      .then(result => {
+        console.info(`Insert record: ${JSON.stringify(record)} with result: ${JSON.stringify(result)}`);
+        result.data = this.transform(record);
+        return result;
       });
   }
 
@@ -79,13 +80,13 @@ class BaseService {
     return this.#database.collection(this.#collection)
       .where({ _id: record._id, revision: record.revision })
       .update({ data: partial })
-      .then(response => {
-        if (response.stats.updated <= 0) {
+      .then(result => {
+        if (result.stats.updated <= 0) {
           throw new Error(`Update record: ${JSON.stringify(record)} failed.`);
         }
 
         record.revision++;
-        return response;
+        return result;
       });
   }
 

@@ -28,6 +28,10 @@ class CertificateService extends BaseService {
   }
 
   async findByResidence(residence) {
+    if (!residence || !residence._id) {
+      throw new Error(`Invalid residence: ${JSON.stringify(residence)} to find certificate.`);
+    }
+
     return this.findBy({
       criteria: {
         residence: {
@@ -55,7 +59,7 @@ class CertificateService extends BaseService {
         cloudPath: `QRcode/${certificate.residence.building.name}/${certificate.residence.room}/`,
         fileContent: buffer
       });
-      console.log(`Upload QRcode: ${certificate._id} succeed with response: ${JSON.stringify(upload)}`);
+      console.log(`Upload QRcode: ${certificate._id} succeed with result: ${JSON.stringify(upload)}`);
 
       let filePath = upload.fileID;
       certificate.qrcode_url = filePath;
@@ -105,7 +109,7 @@ class CertificateService extends BaseService {
         success: true,
         data: {
           certificate: certificate,
-          checkRecord: inserted
+          checkRecord: inserted.data
         }
       };
     } catch (error) {

@@ -6,47 +6,55 @@ const app = getApp();
 Page({
 
   data: {
-    hasQRcode: true,
-    codeSrc: 'cloud://cloud1-9ggmda0qb8fc88af.636c-cloud1-9ggmda0qb8fc88af-1311685783/QRcode/qrcode_img01.yzcdn.cn.png'
+    certificate: {}
   },
 
   onLoad(options) {
-    // wx.cloud.callFunction({
-    //   name: 'outingFunctions',
-    //   data: {
-    //     service: 'residenceService',
-    //     method: 'create',
-    //     args: ['56号楼', '403']
-    //   }
-    // }).then((resp) => {
-    //   return wx.cloud.callFunction({
-    //     name: 'outingFunctions',
-    //     data: {
-    //       service: 'residenceService',
-    //       method: 'certify',
-    //       args: resp.result
-    //     }
-    //   });
-    // }).then((resp) => {
-    //   logger.info(JSON.stringify(resp))
-    // }).catch((error) => {
-    //   logger.error(JSON.stringify(error))
-    // });
+    app.watchUserLogin(this.loadCertificate);
   },
 
-  onReady() {  },
+  onReady() { },
 
   onShow() {
     this.getTabBar().init();
   },
 
   onPullDownRefresh() {
-
+    this.loadCertificate();
   },
 
   onShareAppMessage() {
     return {
       title: '出行证'
     }
-  }
+  },
+
+  loadCertificate() {
+    const loginUser = app.globalData.loginUser;
+    const certificate = loginUser?.certificate;
+    if (!certificate || !certificate.id) {
+      logger.info(`No valid certificate found for currentUser: ${JSON.stringify(loginUser)}`);
+      return;
+    }
+
+    wx.cloud.callFunction({
+      name: 'outingFunctions',
+      data: {
+        service: 'certificateService',
+        method: 'findById',
+        args: certificate.id
+      }
+    }).then((resp) => {
+      this.setData({
+        certificate: resp.result.data
+      });
+      wx.stopPullDownRefresh();
+    });
+  },
+
+  onClickRegisterUser() {
+    wx.switchTab({
+      url: '/pages/profile/index',
+    })
+  },
 })
