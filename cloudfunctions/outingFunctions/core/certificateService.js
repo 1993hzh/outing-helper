@@ -28,25 +28,16 @@ class CertificateService extends BaseService {
   }
 
   async findByResidence(residence) {
-    return db
-      .collection(COLLECTION_CERTIFICATE)
-      .where(_.and([
-        {
-          status: _.gte(0)
-        },
-        {
-          residence: {
-            id: residence._id
-          }
+    return this.findBy({
+      criteria: {
+        residence: {
+          id: residence._id
         }
-      ]))
-      .orderBy('created_at', 'desc')
-      .get()
-      .then((response) => {
-        if (response.data) {
-          response.data.map(e => this.transform(e));
-        }
-      });
+      },
+      orderBy: [
+        { prop: 'created_at', type: 'desc' }
+      ]
+    });
   }
 
   async createQRcode(certificate) {

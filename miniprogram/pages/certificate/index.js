@@ -34,31 +34,19 @@ Page({
     // });
   },
 
-  onReady() {
-
-  },
+  onReady() {  },
 
   onShow() {
     this.getTabBar().init();
-  },
-
-  onHide() {
-
-  },
-
-  onUnload() {
-
   },
 
   onPullDownRefresh() {
 
   },
 
-  onReachBottom() {
-
-  },
-
   onShareAppMessage() {
-
+    return {
+      title: '出行证'
+    }
   }
 })

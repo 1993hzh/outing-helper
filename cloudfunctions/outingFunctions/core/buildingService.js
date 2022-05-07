@@ -17,6 +17,10 @@ class BuildingService {
   async findByName(name) {
     return this.#INDEXED_BUILDINGS.get(name);
   }
+
+  async list() {
+    return this.#BUILT_IN;
+  }
 }
 
 module.exports = BuildingService;

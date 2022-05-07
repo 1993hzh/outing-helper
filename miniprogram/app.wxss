@@ -7,6 +7,10 @@ page {
     sans-serif;
 }
 
+.global__fix_tabbar {
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+}
+
 /* .container {
   display: flex;
   flex-direction: column;

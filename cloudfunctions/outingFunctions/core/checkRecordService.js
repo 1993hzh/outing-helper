@@ -30,23 +30,15 @@ class CheckRecordService extends BaseService {
     const thisMonday = moment()
       .weekday(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
       .toDate();
-    console.log(thisMonday);
-    return db
-      .collection(COLLECTION_CHECK_RECORD)
-      .where(_.and([
-        { status: _.gte(0) },
-        { certificate_id: certificate_id },
-        { created_at: _.gte(thisMonday) }
-      ]))
-      .orderBy('created_at', 'asc')
-      .get()
-      .then((response) => {
-        let data = response.data;
-        if (data) {
-          response.data = data.map(e => this.transform(e));
-        }
-        return response;
-      });
+    return this.findBy({
+      criteria: {
+        certificate_id: certificate_id,
+        created_at: _.gte(thisMonday)
+      },
+      orderBy: [
+        { prop: 'created_at', type: 'asc' }
+      ]
+    });
   }
 }
 

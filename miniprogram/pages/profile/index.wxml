@@ -1,0 +1,86 @@
+<!--pages/profile/profile.wxml-->
+<van-toast id="van-toast"/>
+
+<!-- inputs part -->
+<view>
+  <form bindsubmit="onSubmitProfile" bindreset="">
+    <van-cell-group>
+      <van-field
+        name="userName"
+        label="姓名"
+        placeholder="请输入姓名"
+        required
+        error="{{ nameInputError }}"
+        left-icon="contact"
+        right-icon="info-o"
+      />
+      <van-field
+        name="contactNumber"
+        label="手机号"
+        placeholder="请输入手机号"
+        required
+        error="{{ contactInputError }}"
+        left-icon="phone-o"
+        right-icon="info-o"
+      />
+    </van-cell-group>
+    <van-cell-group>
+      <van-field
+        id="building"
+        name="building"
+        value="{{ residenceInputs.currentBuilding.name }}"
+        label="楼栋号"
+        clickable
+        required
+        readonly
+        placeholder="请选择所在楼栋号"
+        left-icon="location-o"
+        right-icon="info-o"
+        error-message="{{ residenceInputs.buildingErrorMsg }}"
+        bind:click-input="onClickBuildingInput"
+      />
+      <van-field
+        name="residence"
+        value="{{ residenceInputs.currentResidence.room }}"
+        label="室号"
+        clickable
+        required
+        readonly
+        error="{{ residenceInputError }}"
+        placeholder="请选择所在室号"
+        left-icon="wap-home-o"
+        right-icon="info-o"
+        bind:click-input="onClickRoomInput"
+      />
+    </van-cell-group>
+    <van-button custom-class="submit-button" round block type="primary" icon="completed" form-type="submit">提交审核</van-button>
+  </form>
+</view>
+<!-- popup part -->
+<van-popup
+  show="{{ residenceInputs.showResidencePopup }}"
+  bind:close="onClosePopup"
+  position="bottom"
+  z-index="99999"
+  safe-area-inset-top="{{true}}">
+  <view hidden="{{ !residenceInputs.buildingInput.showBuildingPicker }}">
+    <van-picker
+      columns="{{ residenceInputs.buildingInput.buildings }}"
+      show-toolbar
+      loading="{{ residenceInputs.buildingInput.loadBuildings}}"
+      title="选择楼号"
+      value-key="name"
+      bind:cancel="onClosePopup"
+      bind:confirm="onBuildingPickerConfirm"/>
+  </view>
+  <view hidden="{{ !residenceInputs.roomInput.showResidencePicker }}">
+    <van-picker
+      columns="{{ residenceInputs.roomInput.residences }}"
+      show-toolbar
+      loading="{{ residenceInputs.roomInput.loadResidences }}"
+      title="选择室号"
+      value-key="room"
+      bind:cancel="onClosePopup"
+      bind:confirm="onResidencePickerConfirm"/>
+  </view>
+</van-popup>

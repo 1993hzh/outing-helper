@@ -2,7 +2,8 @@
   "pages": [
     "pages/certificate/index",
     "pages/record/index",
-    "pages/check/index"
+    "pages/check/index",
+    "pages/profile/index"
   ],
   "tabBar": {
     "custom": true,
@@ -15,6 +16,9 @@
       },
       {
         "pagePath": "pages/check/index"
+      },
+      {
+        "pagePath": "pages/profile/index"
       }
     ]
   },
@@ -42,7 +46,9 @@
     "van-cell-group": "@vant/weapp/cell-group/index",
     "van-toast": "@vant/weapp/toast/index",
     "van-empty": "@vant/weapp/empty/index",
-    "van-popup": "@vant/weapp/popup/index"
+    "van-popup": "@vant/weapp/popup/index",
+    "van-field": "@vant/weapp/field/index",
+    "van-picker": "@vant/weapp/picker/index"
   },
   "useExtendedLib": {
     "weui": true

@@ -23,21 +23,18 @@ class ResidenceService extends BaseService {
     super(COLLECTION_RESIDENCE, tx);
   }
 
-  async find(residence) {
-    return db
-      .collection(COLLECTION_RESIDENCE)
-      .where(_.and([
-        {
-          building: {
-            id: residence.building.id
-          }
-        },
-        {
-          room: residence.room
-        }
-      ]))
-      .limit(1)
-      .get();
+  async listByBuilding(building) {
+    if (!building) {
+      throw new Error(`Invalid building: ${JSON.stringify(building)}.`);
+    }
+
+    return this.findBy({
+      criteria: {
+        building: { id: building.id },
+      },
+      orderBy: [],
+      limit: 1
+    });
   }
 
   // return db record if the residence exists
@@ -47,23 +44,24 @@ class ResidenceService extends BaseService {
       throw new Error(`Cannot find building with name: ${buildingName}.`);
     }
 
-    const residence = {
-      building: building,
-      room: room,
-      status: 0
-    };
+    return this.findBy({
+      criteria: {
+        building: { id: building.id },
+        room: room,
+        status: 0,
+      },
+      orderBy: [],
+      limit: 1
+    }).then((response) => {
+      let exists = response.data;
+      if (exists && exists.length > 0) {
+        console.info(`Return existing Residence: ${JSON.stringify(exists)}`);
+        return exists[0];
+      }
 
-    return this.find(residence)
-      .then((response) => {
-        let exists = response.data;
-        if (exists && exists.length > 0) {
-          console.info(`Return existing Residence: ${JSON.stringify(exists)}`);
-          return exists[0];
-        }
-
-        console.info(`Inserting Residence: ${JSON.stringify(residence)}`);
-        return super.insert(residence);
-      });
+      console.info(`Inserting Residence: ${JSON.stringify(residence)}`);
+      return super.insert(residence);
+    });
   }
 
   async certify(residence) {

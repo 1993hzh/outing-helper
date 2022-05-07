@@ -27,6 +27,29 @@ class BaseService {
       });
   }
 
+  async findBy({ criteria, orderBy, limit }) {
+    var query = this.#database.collection(this.#collection)
+      .where(_.and([
+        {
+          status: _.gte(0)
+        },
+        criteria
+      ]));
+    if (orderBy) {
+      orderBy.forEach(e => query = query.orderBy(e.prop, e.type));
+    }
+    if (limit) {
+      query.limit(limit);
+    }
+    return query.get()
+      .then((response) => {
+        if (response.data) {
+          response.data = response.data.map(e => this.transform(e));
+        }
+        return response;
+      });
+  }
+
   // return created object
   async insert(record) {
     const wxContext = cloud.getWXContext();

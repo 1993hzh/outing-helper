@@ -2,11 +2,13 @@ const BuildingService = require('./core/buildingService')
 const CertificateService = require('./core/certificateService')
 const CheckRecordService = require('./core/checkRecordService')
 const ResidenceService = require('./core/residenceService')
+const UserService = require('./core/userService')
 
 const buildingService = new BuildingService();
 const certificateService = new CertificateService();
 const checkRecordService = new CheckRecordService();
 const residenceService = new ResidenceService();
+const userService = new UserService();
 
 // 云函数入口函数
 exports.main = async (event, context) => {
@@ -16,6 +18,8 @@ exports.main = async (event, context) => {
     case 'buildingService':
       if (method === 'findByName') {
         return await buildingService.findByName(event.args);
+      } else if (method === 'list') {
+        return await buildingService.list();
       }
     case 'certificateService':
       if (method === 'findById') {
@@ -38,10 +42,24 @@ exports.main = async (event, context) => {
     case 'residenceService':
       if (method === 'findById') {
         return await residenceService.findById(event.args);
+      } else if (method === 'listByBuilding') {
+        return await residenceService.listByBuilding(event.args);
       } else if (method === 'create') {
         return await residenceService.create(...event.args);
       } else if (method === 'certify') {
         return await residenceService.certify(event.args);
+      }
+    case 'userService':
+      if (method === 'login') {
+        return await userService.login();
+      } else if (method === 'create') {
+        return await userService.create(event.args);
+      } else if (method === 'register') {
+        return await userService.register(...event.args);
+      } else if (method === 'bindCertificate') {
+        return await userService.bindCertificate(event.args);
+      } else if (method === 'findByCertificate') {
+        return await userService.findByCertificate(event.args);
       }
   }
 

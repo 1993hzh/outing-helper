@@ -1,21 +1,28 @@
 class User {
 
   _id = undefined;
-  name = '';
   wx_open_id = '';
+  name = '';
   contact_number = '';
-  status = 0;
+  residence = {
+    id: undefined,
+    building: undefined,
+    room: undefined
+  };
   certificate = {
     id: '',
     qrcode_url: ''
   };
+  managed_buildings = {};
+  status = 0;// -1: deleted, 0: valid
+  revision = 0;
+  created_at = undefined;
+  created_by = undefined;
+  updated_at = undefined;
+  updated_by = undefined;
 
-  managed_buildings = {
-
-  };
-
-  constructor(id) {
-    this._id = id;
+  constructor(jsonObject) {
+    Object.assign(this, jsonObject);
   }
 
   bind(certificate) {

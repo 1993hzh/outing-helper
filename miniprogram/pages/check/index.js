@@ -27,7 +27,9 @@ Page({
   },
 
   onShareAppMessage() {
-
+    return {
+      title: '出行检查'
+    }
   },
 
   onClickScan() {

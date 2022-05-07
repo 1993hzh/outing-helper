@@ -1,0 +1,4 @@
+/* pages/profile/profile.wxss */
+.submit-button {
+  margin-top: 20rpx;
+}

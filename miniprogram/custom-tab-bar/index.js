@@ -25,6 +25,13 @@ Component({
         icon: "eye-o",
         text: "出行检查",
         hide: false
+      },
+      {
+        name: 'profile',
+        url: "/pages/profile/index",
+        icon: "user-o",
+        text: "出行信息",
+        hide: false
       }
     ]
   },

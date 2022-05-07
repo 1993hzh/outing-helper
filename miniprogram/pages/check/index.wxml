@@ -6,7 +6,13 @@
         扫一扫
     </van-button>
 </view>
-<van-popup show="{{ showCheckPopup }}" bind:close="onClosePopup" position="top" safe-area-inset-top="{{true}}" custom-style="height: 60%;">
+<van-popup
+  show="{{ showCheckPopup }}"
+  bind:close="onClosePopup" 
+  custom-style="height: 75%;"
+  position="bottom"
+  z-index="99999"
+  safe-area-inset-top="{{true}}">
     <!-- records part -->
     <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
         <van-cell center value="{{item.displayDateTime}}" use-label-slot="{{true}}" size="large">
