@@ -54,13 +54,6 @@ Component({
     },
 
     ready() {
-      // find active bar
-      const page = getCurrentPages().pop();
-      const activeBar = this.data.list.find(item => item.url === `/${page.route}`);
-      this.setData({
-        active: activeBar.name,
-      });
-
       if (app.globalData.hasUser) {
         this.adjustBar();
       } else {
@@ -80,12 +73,16 @@ Component({
       })
     },
 
-    // check user role
     adjustBar() {
+      // find active bar
+      const page = getCurrentPages().pop();
+      const activeBar = this.data.list.find(item => item.url === `/${page.route}`);
+    // check user role
       const loginUser = app.globalData.loginUser;
       const noticable = loginUser?.status === 10 || !loginUser?.residence?._id;
       const checker = loginUser?.check_points && Object.keys(loginUser?.check_points).length > 0;
       this.setData({
+        active: activeBar.name,
         'list[1].info': loginUser?.certificate?.outing_count,
         'list[2].hide': !checker,
         'list[3].dot': noticable,
