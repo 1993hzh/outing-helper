@@ -15,7 +15,7 @@
   safe-area-inset-top="{{true}}">
     <!-- records part -->
     <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
-        <van-cell center value="{{item.displayDateTime}}" use-label-slot="{{true}}" size="large">
+        <van-cell center value="{{item.displayDateTime}}" use-label-slot size="large">
             <view slot="title">
                 <van-tag wx:if="{{item.check_type === 0}}" type="danger">出</van-tag>
                 <van-tag wx:if="{{item.check_type === 1}}" type="success">进</van-tag>

@@ -12,12 +12,19 @@ Page({
   },
 
   onLoad(options) {
-    this.loadData();
+    if (app.globalData.hasUser) {
+      this.loadData();
+    } else {// user not login
+      Toast.loading({ message: '正在加载', forbidClick: true, });
+
+      app.watchUserLogin((user) => {
+        Toast.clear();
+        this.loadData();
+      });
+    }
   },
 
-  onShow() {
-    this.getTabBar().init();
-  },
+  onShow() { },
 
   onShareAppMessage() {
     return {
@@ -30,8 +37,7 @@ Page({
   },
 
   loadData() {
-    const certId = 'wxpkz9dCoabo3V81tC8UA';
-    // const certId = app.globalData.loginUser?.certificate?._id;
+    const certId = app.globalData.loginUser?.certificate?._id;
     if (!certId) {
       return;
     }

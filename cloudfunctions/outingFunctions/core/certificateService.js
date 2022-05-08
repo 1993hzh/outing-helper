@@ -14,13 +14,14 @@ const _ = db.command;
 const $ = _.aggregate;
 const COLLECTION_CERTIFICATE = 'certificate';
 const QR_CODE_TARGET_PAGE = 'pages/check/index';
-/* service */
-const checkRecordService = new CheckRecordService();
 
 class CertificateService extends BaseService {
 
-  constructor(tx) {
-    super(COLLECTION_CERTIFICATE, tx);
+  checkRecordService = undefined;
+
+  constructor(context) {
+    super(COLLECTION_CERTIFICATE, context);
+    this.checkRecordService = new CheckRecordService(context);
   }
 
   transform(jsonObject) {
@@ -35,20 +36,42 @@ class CertificateService extends BaseService {
     return this.findBy({
       criteria: {
         residence: {
-          id: residence._id
+          _id: residence._id
         }
       },
       orderBy: [
         { prop: 'created_at', type: 'desc' }
-      ]
+      ],
+      limit: 1
     });
+  }
+
+  async certify(residence) {
+    if (!residence || !residence._id) {
+      throw new Error(`Invalid residence to certify: ${JSON.stringify(residence)}.`);
+    }
+
+    console.info(`Certify Residence: ${JSON.stringify(residence)}`);
+
+    const certificate = new Certificate();
+    certificate.residence = {
+      _id: residence._id,
+      building: residence.building,
+      room: residence.room
+    };
+
+    const result = await this.insert(certificate);
+    const cert = result.data;
+    console.info(`Successfully certified: ${JSON.stringify(cert)}`);
+    this.createQRcode(cert);
+    return cert;
   }
 
   async createQRcode(certificate) {
     try {
       // 生成无数量限制的二维码
       const resp = await cloud.openapi.wxacode.getUnlimited({
-        "scene": `id=${certificate._id}`,
+        "scene": `${certificate._id}`,
         "page": QR_CODE_TARGET_PAGE,
         "checkPath": true,
         "envVersion": 'release'
@@ -56,7 +79,7 @@ class CertificateService extends BaseService {
 
       const { buffer } = resp;
       const upload = await cloud.uploadFile({// 将图片上传云存储空间
-        cloudPath: `QRcode/${certificate.residence.building.name}/${certificate.residence.room}/`,
+        cloudPath: `QRcode/${certificate.residence.building.name}/${certificate.residence.room}/${certificate._id}`,
         fileContent: buffer
       });
       console.log(`Upload QRcode: ${certificate._id} succeed with result: ${JSON.stringify(upload)}`);
@@ -64,17 +87,10 @@ class CertificateService extends BaseService {
       let filePath = upload.fileID;
       certificate.qrcode_url = filePath;
       await this.update(certificate, { qrcode_url: filePath });
-      return {
-        success: true,
-        data: certificate
-      }
+      return certificate;
     } catch (error) {
       console.error(`create QR code for certificate: ${JSON.stringify(certificate)} failed.`, error);
-      return {
-        success: false,
-        errorCode: error.errCode,
-        errorMessage: error.errMsg
-      };
+      throw error;
     }
   }
 
@@ -100,11 +116,9 @@ class CertificateService extends BaseService {
 
   // private
   async persist(certificate, checkRecord) {
-    const transaction = await db.startTransaction();
     try {
       const inserted = await new CheckRecordService(transaction).insert(checkRecord);
       await this.update(certificate, { outing_count: certificate.outing_count });
-      await transaction.commit();
       return {
         success: true,
         data: {
@@ -113,7 +127,6 @@ class CertificateService extends BaseService {
         }
       };
     } catch (error) {
-      await transaction.rollback();
       console.error(`certificate: ${JSON.stringify(certificate)} persist failed.`, error);
       return {
         success: false,

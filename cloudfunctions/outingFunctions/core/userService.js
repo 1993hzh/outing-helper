@@ -1,4 +1,5 @@
 const BaseService = require('./baseService')
+const CertificateService = require('./certificateService')
 const User = require('./user')
 
 const moment = require('moment')
@@ -14,8 +15,11 @@ const COLLECTION_USER = 'user';
 
 class UserService extends BaseService {
 
-  constructor(tx) {
-    super(COLLECTION_USER, tx);
+  certificateService = undefined;
+
+  constructor(context) {
+    super(COLLECTION_USER, context);
+    this.certificateService = new CertificateService(context);
   }
 
   transform(jsonObject) {
@@ -59,7 +63,7 @@ class UserService extends BaseService {
     return this.insert(user);
   }
 
-  async register(user) {
+  async updateProfile(user) {
     if (!user || !user.name || !user.contact_number || !user.residence) {
       throw new Error(`Found invalid user: ${JSON.stringify(user)}.`);
     }
@@ -70,19 +74,26 @@ class UserService extends BaseService {
         contact_number: user.contact_number,
         residence: user.residence,
       }
-    );
-  }
-
-  async bindCertificate(user) {
-    if (!user || !user.certificate) {
-      throw new Error('Found invalid user.');
-    }
-
-    return this.update(user,
-      {
-        certificate: user.certificate,
+    ).then((result) => {
+      return this.certificateService.findByResidence(user.residence)
+    }).then((result) => {
+      const certs = result.data;
+      if (certs.length <= 0) {
+        return this.certificateService.certify(user.residence);
+      } else {
+        return result.data[0];
       }
-    );
+    }).then((result) => {
+      console.log(`Find or certify a cert: ${JSON.stringify(result)}`);
+      const cert = result;
+      cert.bindTo(user);
+      return this.update(user,
+        {
+          certificate: {
+            id: cert._id,
+          },
+        });
+    });
   }
 
   async findByCertificate(certificate_id) {
@@ -93,7 +104,7 @@ class UserService extends BaseService {
     return this.findBy({
       criteria: {
         certificate: {
-          id: certificate_id
+          _id: certificate_id
         }
       },
       orderBy: [

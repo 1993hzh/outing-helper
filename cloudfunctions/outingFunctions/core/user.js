@@ -5,16 +5,37 @@ class User {
   name = '';
   contact_number = '';
   residence = {
-    id: undefined,
+    _id: undefined,
     building: undefined,
     room: undefined
   };
   certificate = {
-    id: undefined
+    _id: undefined
+  };
+  // for role
+  role = {
+    resident: true,
+    checker: undefined,
+    admin: undefined,
+    superAdmin: undefined
   };
   check_points = {};
   managed_buildings = {};
-  status = 0;// -1: deleted, 0: valid
+  // for approval
+  pending_record = {
+    _id: undefined,
+    name: undefined,
+    contact_number: undefined,
+    residence: {
+      _id: undefined,
+      building: undefined,
+      room: undefined
+    },
+    certificate: {
+      _id: undefined
+    },
+  };
+  status = 0;// -1: deleted, 0: valid, 10: hasPendingRecord
   revision = 0;
   created_at = undefined;
   created_by = undefined;

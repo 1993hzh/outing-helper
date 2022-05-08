@@ -1,17 +1,18 @@
 import * as logger from '../utils/log';
+import Toast from '@vant/weapp/toast/toast';
 
 const app = getApp();
 
 Component({
   data: {
     active: 'certificate',
-    placeholder: true,
     list: [
       {
         name: 'certificate',
         url: "/pages/certificate/index",
         icon: "home-o",
         text: "出行证",
+        placeholder: true,
         hide: false
       },
       {
@@ -20,6 +21,7 @@ Component({
         icon: "records",
         info: 0,
         text: "出行记录",
+        placeholder: true,
         hide: false
       },
       {
@@ -27,6 +29,7 @@ Component({
         url: "/pages/check/index",
         icon: "eye-o",
         text: "出行检查",
+        placeholder: true,
         hide: true
       },
       {
@@ -34,16 +37,39 @@ Component({
         url: "/pages/profile/index",
         icon: "user-o",
         text: "出行信息",
+        placeholder: true,
         hide: false
       }
     ]
   },
 
   pageLifetimes: {
-    show() { },
+    show() {
+    },
   },
 
-  attached() { },
+  lifetimes: {
+    attached() {
+      // this.adjustBar();
+    },
+
+    ready() {
+      // find active bar
+      const page = getCurrentPages().pop();
+      const activeBar = this.data.list.find(item => item.url === `/${page.route}`);
+      this.setData({
+        active: activeBar.name,
+      });
+
+      if (app.globalData.hasUser) {
+        this.adjustBar();
+      } else {
+        app.watchUserLogin((user) => {
+          this.adjustBar();
+        });
+      }
+    },
+  },
 
   methods: {
     onChange(event) {
@@ -54,19 +80,15 @@ Component({
       })
     },
 
-    init() {
-      // find active bar
-      const page = getCurrentPages().pop();
-      const activeBar = this.data.list.find(item => item.url === `/${page.route}`);
-      // check user
+    // check user role
+    adjustBar() {
       const loginUser = app.globalData.loginUser;
-      const userNotRegistered = !loginUser?.residence?._id;
+      const noticable = loginUser?.status === 10 || !loginUser?.residence?._id;
       const checker = loginUser?.check_points && Object.keys(loginUser?.check_points).length > 0;
       this.setData({
-        active: activeBar.name,
         'list[1].info': loginUser?.certificate?.outing_count,
         'list[2].hide': !checker,
-        'list[3].dot': userNotRegistered,
+        'list[3].dot': noticable,
       });
     },
   }

@@ -32,18 +32,21 @@ Page({
   },
 
   onLoad(options) {
+    if (!app.globalData.hasUser) {// user not login
+      Toast.loading({ message: '正在加载', forbidClick: true, });
 
+      app.watchUserLogin((user) => {
+        Toast.clear();
+        this.setData({ user: user });
+      });
+    } else {
+      this.setData({ user: app.globalData.loginUser });
+    }
   },
 
   onReady() { },
 
-  onShow() {
-    this.getTabBar().init();
-  },
-
-  onPullDownRefresh() {
-
-  },
+  onShow() { },
 
   onShareAppMessage() {
     return {
@@ -134,26 +137,56 @@ Page({
 
   onResidencePickerConfirm(event) {
     const picker = event.detail;
-    this.setData({ 
-      'residenceInputs.currentResidence': picker.value 
+    this.setData({
+      'residenceInputs.currentResidence': picker.value
     });
     this.onClosePopup();
   },
 
   onSubmitProfile(event) {
     const formValues = event.detail.value;
+    const residence = this.data.residenceInputs.currentResidence;
     const nameInputError = !formValues.userName?.trim();
     const contactInputError = !PHONE_REGEX.test(formValues.contactNumber);
-    const residenceInputError = !this.data.residenceInputs.currentResidence?._id;
+    const residenceInputError = !residence?._id;
+    this.setData({
+      nameInputError: nameInputError,
+      contactInputError: contactInputError,
+      residenceInputError: residenceInputError,
+    });
+
     if (nameInputError || contactInputError || residenceInputError) {
-      this.setData({
-        nameInputError: nameInputError,
-        contactInputError: contactInputError,
-        residenceInputError: residenceInputError,
-      });
       return;
     }
 
-    const loginUser = app.globalData.loginUser;
+    const user = this.data.user;
+    if (!user?._id) {
+      return;
+    }
+
+    user.name = formValues.userName;
+    user.contact_number = formValues.contactNumber;
+    user.residence = {
+      _id: residence._id,
+      building: residence.building,
+      room: residence.room
+    };
+    wx.cloud.callFunction({
+      name: 'outingFunctions',
+      data: {
+        service: 'userService',
+        method: 'updateProfile',
+        args: user
+      }
+    }).then((resp) => {
+      const updatedUser = resp.result.data;
+      logger.info(`updateProfile returned: ${JSON.stringify(resp)}`);
+      this.setData({
+        user: updatedUser
+      })
+    }).catch((err) => {
+      logger.error(`updateProfile for user: ${JSON.stringify(user)} failed.`, err);
+      Toast.fail('更新出错，请联系管理员');
+    });
   },
 })

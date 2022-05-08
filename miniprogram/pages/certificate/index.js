@@ -1,23 +1,33 @@
 // pages/certificate/index.js
 import * as logger from '../../utils/log';
+import Toast from '@vant/weapp/toast/toast';
 
 const app = getApp();
 
 Page({
 
   data: {
-    certificate: {}
+    currentUser: {},
+    certificate: {},
   },
 
   onLoad(options) {
-    app.watchUserLogin(this.loadCertificate);
+    if (!app.globalData.hasUser) {// user not login
+      Toast.loading({ message: '正在加载', forbidClick: true, });
+
+      app.watchUserLogin((user) => {
+        Toast.clear();
+        this.data.currentUser = user;
+        this.loadCertificate();
+      });
+    } else {
+      this.data.currentUser = app.globalData.loginUser;
+    }
   },
 
   onReady() { },
 
-  onShow() {
-    this.getTabBar().init();
-  },
+  onShow() { },
 
   onPullDownRefresh() {
     this.loadCertificate();
@@ -32,8 +42,9 @@ Page({
   loadCertificate() {
     const loginUser = app.globalData.loginUser;
     const certificate = loginUser?.certificate;
-    if (!certificate || !certificate.id) {
+    if (!certificate?._id) {
       logger.info(`No valid certificate found for currentUser: ${JSON.stringify(loginUser)}`);
+      this.setData({ currentUser: loginUser });
       return;
     }
 
@@ -42,11 +53,12 @@ Page({
       data: {
         service: 'certificateService',
         method: 'findById',
-        args: certificate.id
+        args: certificate._id
       }
     }).then((resp) => {
       this.setData({
-        certificate: resp.result.data
+        user: loginUser,
+        certificate: resp.result.data,
       });
       wx.stopPullDownRefresh();
     });

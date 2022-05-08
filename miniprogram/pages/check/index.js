@@ -13,8 +13,11 @@ Page({
   },
 
   onLoad(options) {
-    // const certId = options.id;
-    const certId = 'wxpkz9dCoabo3V81tC8UA';
+    if (!options?.scene) {
+      return;
+    }
+
+    const certId = options.scene;
     if (certId) {
       this.loadData(certId);
     }
@@ -22,9 +25,7 @@ Page({
 
   onReady() { },
 
-  onShow() {
-    this.getTabBar().init();
-  },
+  onShow() { },
 
   onShareAppMessage() {
     return {
@@ -35,8 +36,8 @@ Page({
   onClickScan() {
     wx.scanCode()
       .then((resp) => {
-        logger.info(resp);
-        return wx.navigateTo({ url: resp.result })
+        logger.info(`Scan qr code result: ${JSON.stringify(resp)}`);
+        return wx.switchTab({ url: resp.path })
       })
       .catch((err) => {
         logger.error(err);

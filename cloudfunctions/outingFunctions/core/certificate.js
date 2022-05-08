@@ -12,7 +12,7 @@ class Certificate {
   _id = undefined;
   outing_count = 0;
   residence = {
-    id: undefined,
+    _id: undefined,
     building: undefined,
     room: undefined
   };
@@ -28,17 +28,11 @@ class Certificate {
     Object.assign(this, jsonObject);
   }
 
-  //TODO
-  async bindTo(user) {
+  bindTo(user) {
     console.info(`Binding certificate: ${this._id} to user: ${JSON.stringify(user)}`);
-
-    const wxContext = cloud.getWXContext();
-    user.certificate.id = this._id;
-    user.certificate.qr_code_url = this.qrcode_url;
-    user.certificate.approved_by = wxContext.OPENID;
-    user.certificate.approved_at = new Date();
-
+    user.certificate._id = this._id;
     console.info(`Binding certificate: ${this._id} succeed.`);
+    return user;
   }
 
   checkOut(user) {
@@ -55,7 +49,7 @@ class Certificate {
     record.checked_by = wxContext.OPENID;
     record.certificate_id = this._id;
     record.user = {
-      id: user._id,
+      _id: user._id,
       name: user.name,
       residence: this.residence
     };
@@ -76,7 +70,7 @@ class Certificate {
     record.checked_by = wxContext.OPENID;
     record.certificate_id = this._id;
     record.user = {
-      id: user._id,
+      _id: user._id,
       name: user.name,
       residence: this.residence
     };

@@ -7,6 +7,7 @@
     <van-cell-group>
       <van-field
         name="userName"
+        value="{{ user.status === 10 ? user.pending_record.name : user.name }}"
         label="姓名"
         placeholder="请输入姓名"
         required
@@ -16,6 +17,7 @@
       />
       <van-field
         name="contactNumber"
+        value="{{ user.status === 10 ? user.pending_record.contact_number : user.contact_number }}"
         label="手机号"
         placeholder="请输入手机号"
         required

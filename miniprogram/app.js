@@ -4,8 +4,11 @@ import * as logger from './utils/log';
 
 App({
   globalData: {
-    loginUser: {}
+    hasUser: false,
+    loginUser: {},
   },
+
+  _loginUserWatchers: [],
 
   onLaunch: function () {
     if (!wx.cloud) {
@@ -16,6 +19,7 @@ App({
         traceUser: true,
       });
 
+      this.observeLoginUser();
       this.userLogin();
     }
   },
@@ -35,6 +39,7 @@ App({
 
       logger.info(`User: ${JSON.stringify(user)} login succeed.`);
       this.globalData.loginUser = user;
+      this.globalData.hasUser = true;
       return user;
     }).catch((err) => {
       logger.error(`User login failed.`, err);
@@ -42,13 +47,22 @@ App({
   },
 
   watchUserLogin: function (callback) {
-    const globalData = this.globalData;
-    Object.defineProperty(globalData, "loginUser", {
+    this._loginUserWatchers.push(callback);
+  },
+
+  observeLoginUser: function () {
+    const app = this;
+    Object.defineProperty(app.globalData, "loginUser", {
       configurable: true,
       enumerable: true,
       set(value) {
+        if (value === this._user) {
+          return;
+        }
+
         this._user = value;
-        callback(value);
+        logger.info(`Notify watchers: ${app._loginUserWatchers}`);
+        app._loginUserWatchers.forEach(call => call(value));
       },
       get() {
         return this._user

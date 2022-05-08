@@ -3,10 +3,10 @@ class CheckRecord {
   _id = undefined;
   certificate_id = undefined;
   user = {
-    id: undefined,
+    _id: undefined,
     name: undefined,
     residence: {
-      id: '',
+      _id: '',
       building_id: -1,
       building: '',
       room: ''

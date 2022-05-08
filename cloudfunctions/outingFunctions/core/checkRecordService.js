@@ -14,8 +14,8 @@ const COLLECTION_CHECK_RECORD = 'check_record';
 
 class CheckRecordService extends BaseService {
 
-  constructor(tx) {
-    super(COLLECTION_CHECK_RECORD, tx);
+  constructor(context) {
+    super(COLLECTION_CHECK_RECORD, context);
   }
 
   transform(jsonObject) {
