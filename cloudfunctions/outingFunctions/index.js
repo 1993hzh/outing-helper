@@ -34,13 +34,25 @@ exports.main = async (event, context) => {
       } else if (method === 'findByResidence') {
         return await certificateService.findByResidence(event.args);
       } else if (method === 'createQRcode') {
-        return await certificateService.createQRcode(event.args);
+        return await this.safeRun({
+          context: context,
+          run: () => certificateService.createQRcode(event.args)
+        });
       } else if (method === 'checkIn') {
-        return await certificateService.checkIn(event.args);
+        return await this.safeRun({
+          context: context,
+          run: () => certificateService.checkIn(event.args)
+        });
       } else if (method === 'checkOut') {
-        return await certificateService.checkOut(event.args);
+        return await this.safeRun({
+          context: context,
+          run: () => certificateService.checkOut(event.args)
+        });
       } else if (method === 'certify') {
-        return await certificateService.certify(event.args);
+        return await this.safeRun({
+          context: context,
+          run: () => certificateService.certify(event.args)
+        });
       }
     case 'checkRecordService':
       if (method === 'findById') {
@@ -53,8 +65,11 @@ exports.main = async (event, context) => {
         return await residenceService.findById(event.args);
       } else if (method === 'listByBuilding') {
         return await residenceService.listByBuilding(event.args);
-      } else if (method === 'create') {
-        return await residenceService.create(event.args);
+      } else if (method === 'batchCreate') {
+        return await this.safeRun({
+          context: context,
+          run: () => residenceService.batchCreate(event.args)
+        });
       }
     case 'userService':
       if (method === 'login') {
@@ -91,17 +106,17 @@ exports.safeRun = async ({ context, run }) => {
   context.user = users[0];
   console.log(`Inject user: ${JSON.stringify(context.user)} into context.`);
   // start tx
-  const transaction = await db.startTransaction();
+  // const transaction = await db.startTransaction();
   try {
     // inject tx to context
     // context.transaction = transaction;
     // do run
     const result = await run();
     // try commit
-    await transaction.commit();
+    // await transaction.commit();
     return result;
   } catch (error) {
-    await transaction.rollback();
+    // await transaction.rollback();
     console.error(error);
     return error;
   }

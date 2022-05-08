@@ -1,0 +1,48 @@
+<!--pages/approval/index.wxml-->
+<van-toast id="van-toast"/>
+<view>
+  <form bindsubmit="onSubmitResidences" bindreset="">
+    <van-cell-group>
+      <van-field
+        id="building"
+        name="building"
+        value="{{ buildingInput.currentBuilding.name }}"
+        label="楼栋号"
+        clickable
+        required
+        readonly
+        placeholder="请选择楼栋号"
+        left-icon="location-o"
+        right-icon="info-o"
+        bind:click-input="onClickBuildingInput"
+      />
+      <van-field
+        name="roomList"
+        type="textarea"
+        label="室号"
+        placeholder="请输入室号"
+        required
+        autosize
+        left-icon="wap-home-o"
+        right-icon="info-o"
+      />
+    </van-cell-group>
+    <van-button custom-class="submit-button" round block type="primary" icon="completed" form-type="submit">生成住处</van-button>
+  </form>
+</view>
+<!-- popup part -->
+<van-popup
+  show="{{ showBuildingPopup }}"
+  bind:close="onClosePopup"
+  position="bottom"
+  z-index="99999"
+  safe-area-inset-top="{{true}}">
+  <van-picker
+    columns="{{ buildingInput.buildings }}"
+    show-toolbar
+    loading="{{ buildingInput.loadBuildings}}"
+    title="选择楼号"
+    value-key="name"
+    bind:cancel="onClosePopup"
+    bind:confirm="onBuildingPickerConfirm"/>
+</van-popup>

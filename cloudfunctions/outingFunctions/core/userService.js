@@ -90,7 +90,7 @@ class UserService extends BaseService {
       return this.update(user,
         {
           certificate: {
-            id: cert._id,
+            _id: cert._id,
           },
         });
     });

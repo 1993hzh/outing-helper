@@ -3,13 +3,14 @@ import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
 
 const app = getApp();
+const queryString = require('query-string');
 
 Page({
 
   data: {
     showCheckPopup: false,
     certificate: undefined,
-    checkRecords: []
+    checkRecords: [],
   },
 
   onLoad(options) {
@@ -38,20 +39,15 @@ Page({
   onScanQRcode(options) {
     const user = app.globalData.loginUser;
     if (!user.role?.checker) {
+      // no permission, go to home
       wx.switchTab({
         url: '/pages/certificate/index',
       });
-    }
-    if (!options?.scene) {
-      logger.warn(`Cannot find scene from: ${JSON.stringify(options)}`);
       return;
     }
 
-    const certId = options.scene;
-    if (certId) {
-      this.loadData(certId);
-    } else {
-      Toast.fail({ message: '二维码不正确。', zIndex: 999999, });
+    if (options?.scene) {
+      this.loadData(options?.scene);
     }
   },
 
@@ -59,8 +55,16 @@ Page({
   onClickScan() {
     wx.scanCode()
       .then((resp) => {
-        logger.info(`Scan qr code result: ${JSON.stringify(resp)}`);
-        return wx.switchTab({ url: resp.path })
+        const path = resp?.path;
+        const result = queryString.parseUrl(path);
+        const certId = result?.query?.scene;
+        logger.info(`Internal scan result: ${JSON.stringify(result)}`);
+
+        if (result?.url === 'pages/check/index') {
+          return this.loadData(certId)
+        } else {
+          Toast.fail({ message: '二维码不正确。', zIndex: 999999, });
+        }
       })
       .catch((err) => {
         logger.error(err);
@@ -129,7 +133,11 @@ Page({
   },
 
   loadData(certId) {
-    Toast.loading({ message: '正在加载...', forbidClick: true, zIndex: 999999, });
+    if (!certId) {
+      Toast.fail({ message: '二维码不正确。', zIndex: 999999, });
+    } else {
+      Toast.loading({ message: '正在加载...', forbidClick: true, zIndex: 999999, });
+    }
 
     wx.cloud.callFunction({
       name: 'outingFunctions',
@@ -164,7 +172,7 @@ Page({
 
       Toast.clear();
     }).catch((error) => {
-      logger.error(`check load by id: ${certId} failed with: ${JSON.stringify(error)}`);
+      logger.error(`Check cert by id: ${certId} failed.`, error);
       Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
     });
   },

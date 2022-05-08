@@ -3,7 +3,8 @@
     "pages/certificate/index",
     "pages/record/index",
     "pages/check/index",
-    "pages/profile/index"
+    "pages/profile/index",
+    "pages/approval/index"
   ],
   "tabBar": {
     "custom": true,
@@ -19,6 +20,9 @@
       },
       {
         "pagePath": "pages/profile/index"
+      },
+      {
+        "pagePath": "pages/approval/index"
       }
     ]
   },

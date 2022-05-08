@@ -29,27 +29,31 @@ class ResidenceService extends BaseService {
       criteria: {
         building: { id: building.id },
       },
-      orderBy: [],
-      limit: 1
+      orderBy: [
+        { prop: 'created_at', type: 'asc' }
+      ],
     });
   }
 
   // return db record if the residence exists
-  async create({ buildingName, room }) {
-    const building = await buidingService.findByName(buildingName);
+  async create({ building, room }) {
     if (!building) {
       throw new Error(`Cannot find building with name: ${buildingName}.`);
     }
 
+    if (!building.id) {
+      building = await buidingService.findByName(buildingName);
+    }
+
     const partialResidence = {
-      building: { id: building.id },
+      building: building,
       room: room,
       status: 0,
     };
     return this.findBy({
       criteria: partialResidence,
       orderBy: [],
-      limit: 1
+      limit: 1,
     }).then((result) => {
       let exists = result.data;
       if (exists && exists.length > 0) {
@@ -61,6 +65,23 @@ class ResidenceService extends BaseService {
       console.info(`Inserting Residence: ${JSON.stringify(partialResidence)}`);
       return super.insert(partialResidence);
     });
+  }
+
+  async batchCreate({ building, rooms }) {
+    if (!building || !rooms) {
+      throw new Error(`Invalid params: ${building}, ${rooms}.`);
+    }
+
+    const data = rooms.split("；").map(room => {
+      return this.create({
+        building: building,
+        room: room
+      });
+    });
+    return {
+      success: true,
+      data: data,
+    }
   }
 }
 

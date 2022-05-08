@@ -117,7 +117,7 @@ class CertificateService extends BaseService {
   // private
   async persist(certificate, checkRecord) {
     try {
-      const inserted = await new CheckRecordService(transaction).insert(checkRecord);
+      const inserted = await this.checkRecordService.insert(checkRecord);
       await this.update(certificate, { outing_count: certificate.outing_count });
       return {
         success: true,

@@ -40,7 +40,7 @@ Page({
   },
 
   loadCertificate() {
-    const loginUser = this.data.currentUser;
+    const loginUser = app.globalData.loginUser;
     const certificate = loginUser?.certificate;
     if (!certificate?._id) {
       logger.info(`No valid certificate found for currentUser: ${JSON.stringify(loginUser)}`);
@@ -57,7 +57,7 @@ Page({
       }
     }).then((resp) => {
       this.setData({
-        user: loginUser,
+        currentUser: loginUser,
         certificate: resp.result.data,
       });
       wx.stopPullDownRefresh();

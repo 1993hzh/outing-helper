@@ -39,6 +39,14 @@ Component({
         text: "出行信息",
         placeholder: true,
         hide: false
+      },
+      {
+        name: 'approval',
+        url: "/pages/approval/index",
+        icon: "sign",
+        text: "信息审核",
+        placeholder: true,
+        hide: true
       }
     ]
   },
@@ -77,15 +85,15 @@ Component({
       // find active bar
       const page = getCurrentPages().pop();
       const activeBar = this.data.list.find(item => item.url === `/${page.route}`);
-    // check user role
+      // check user role
       const loginUser = app.globalData.loginUser;
       const noticable = loginUser?.status === 10 || !loginUser?.residence?._id;
-      const checker = loginUser?.check_points && Object.keys(loginUser?.check_points).length > 0;
       this.setData({
         active: activeBar.name,
         'list[1].info': loginUser?.certificate?.outing_count,
-        'list[2].hide': !checker,
+        'list[2].hide': !loginUser?.role?.checker,
         'list[3].dot': noticable,
+        'list[4].hide': !loginUser?.role?.admin && !loginUser?.role?.superAdmin,
       });
     },
   }

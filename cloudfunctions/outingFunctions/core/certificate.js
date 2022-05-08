@@ -37,7 +37,7 @@ class Certificate {
 
   checkOut(user) {
     console.info(`Check-out certificate: ${this._id}.`);
-    if (this.status !== 0) {
+    if (this.status !== 1) {
       throw new Error(`Invalid status for certificate: ${JSON.stringify(this)}`);
     }
 
@@ -58,7 +58,7 @@ class Certificate {
 
   checkIn(user) {
     console.info(`Check-in certificate: ${this._id}.`);
-    if (this.status !== 0) {
+    if (this.status !== 1) {
       throw new Error(`Invalid status for certificate: ${JSON.stringify(this)}`);
     }
 
