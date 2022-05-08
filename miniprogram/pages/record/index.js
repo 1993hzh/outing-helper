@@ -16,7 +16,6 @@ Page({
       this.loadData();
     } else {// user not login
       Toast.loading({ message: '正在加载', forbidClick: true, });
-
       app.watchUserLogin((user) => {
         Toast.clear();
         this.loadData();

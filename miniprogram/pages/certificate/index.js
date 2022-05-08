@@ -14,7 +14,6 @@ Page({
   onLoad(options) {
     if (!app.globalData.hasUser) {// user not login
       Toast.loading({ message: '正在加载', forbidClick: true, });
-
       app.watchUserLogin((user) => {
         Toast.clear();
         this.data.currentUser = user;
@@ -22,6 +21,7 @@ Page({
       });
     } else {
       this.data.currentUser = app.globalData.loginUser;
+      this.loadCertificate();
     }
   },
 
@@ -40,7 +40,7 @@ Page({
   },
 
   loadCertificate() {
-    const loginUser = app.globalData.loginUser;
+    const loginUser = this.data.currentUser;
     const certificate = loginUser?.certificate;
     if (!certificate?._id) {
       logger.info(`No valid certificate found for currentUser: ${JSON.stringify(loginUser)}`);

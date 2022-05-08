@@ -13,13 +13,14 @@ Page({
   },
 
   onLoad(options) {
-    if (!options?.scene) {
-      return;
-    }
-
-    const certId = options.scene;
-    if (certId) {
-      this.loadData(certId);
+    if (!app.globalData.hasUser) {// user not login
+      Toast.loading({ message: '正在加载', forbidClick: true, });
+      app.watchUserLogin((user) => {
+        Toast.clear();
+        this.onScanQRcode(options);
+      });
+    } else {
+      this.onScanQRcode(options);
     }
   },
 
@@ -33,6 +34,28 @@ Page({
     }
   },
 
+  // from external
+  onScanQRcode(options) {
+    const user = app.globalData.loginUser;
+    if (!user.role?.checker) {
+      wx.switchTab({
+        url: '/pages/certificate/index',
+      });
+    }
+    if (!options?.scene) {
+      logger.warn(`Cannot find scene from: ${JSON.stringify(options)}`);
+      return;
+    }
+
+    const certId = options.scene;
+    if (certId) {
+      this.loadData(certId);
+    } else {
+      Toast.fail({ message: '二维码不正确。', zIndex: 999999, });
+    }
+  },
+
+  // from internal
   onClickScan() {
     wx.scanCode()
       .then((resp) => {
