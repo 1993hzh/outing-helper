@@ -52,7 +52,8 @@
     "van-empty": "@vant/weapp/empty/index",
     "van-popup": "@vant/weapp/popup/index",
     "van-field": "@vant/weapp/field/index",
-    "van-picker": "@vant/weapp/picker/index"
+    "van-picker": "@vant/weapp/picker/index",
+    "van-loading": "@vant/weapp/loading/index"
   },
   "useExtendedLib": {
     "weui": true

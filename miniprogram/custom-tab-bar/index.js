@@ -53,20 +53,21 @@ Component({
 
   pageLifetimes: {
     show() {
+      // not working for tab bar
     },
   },
 
   lifetimes: {
     attached() {
-      // this.adjustBar();
     },
 
+    // invoke only once
     ready() {
       if (app.globalData.hasUser) {
-        this.adjustBar();
+        this.adjustBarByUser();
       } else {
         app.watchUserLogin((user) => {
-          this.adjustBar();
+          this.adjustBarByUser();
         });
       }
     },
@@ -81,19 +82,26 @@ Component({
       })
     },
 
-    adjustBar() {
+    adjustBarByUser() {
       // find active bar
       const page = getCurrentPages().pop();
       const activeBar = this.data.list.find(item => item.url === `/${page.route}`);
       // check user role
       const loginUser = app.globalData.loginUser;
-      const noticable = loginUser?.status === 10 || !loginUser?.residence?._id;
       this.setData({
         active: activeBar.name,
         'list[1].info': loginUser?.certificate?.outing_count,
         'list[2].hide': !loginUser?.role?.checker,
-        'list[3].dot': noticable,
+        'list[3].dot': !loginUser?.role?.resident || loginUser?.status === 10,
         'list[4].hide': !loginUser?.role?.admin && !loginUser?.role?.superAdmin,
+      });
+    },
+
+    dynamicResetWhenShow() {
+      const loginUser = app.globalData.loginUser;
+      this.setData({
+        'list[1].info': loginUser?.certificate?.outing_count,
+        'list[3].dot': !loginUser?.role?.resident || loginUser?.status === 10,
       });
     },
   }

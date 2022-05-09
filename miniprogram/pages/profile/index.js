@@ -46,7 +46,9 @@ Page({
 
   onReady() { },
 
-  onShow() { },
+  onShow() {
+    this.getTabBar().dynamicResetWhenShow();
+  },
 
   onShareAppMessage() {
     return {

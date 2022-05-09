@@ -3,12 +3,7 @@ const CertificateService = require('./core/certificateService')
 const CheckRecordService = require('./core/checkRecordService')
 const ResidenceService = require('./core/residenceService')
 const UserService = require('./core/userService')
-
-const cloud = require('wx-server-sdk');
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
-});
-const db = cloud.database();
+const SafeRunner = require('./safeRunner')
 
 // 云函数入口函数
 exports.main = async (event, context) => {
@@ -18,9 +13,12 @@ exports.main = async (event, context) => {
   const checkRecordService = new CheckRecordService(context);
   const residenceService = new ResidenceService(context);
   const userService = new UserService(context);
+  // safe run
+  const safeRunner = new SafeRunner(context);
   // API routing
   const service = event.service;
   const method = event.method;
+
   switch (service) {
     case 'buildingService':
       if (method === 'findByName') {
@@ -30,28 +28,30 @@ exports.main = async (event, context) => {
       }
     case 'certificateService':
       if (method === 'findById') {
-        return await certificateService.findById(event.args);
+        return await safeRunner.run({
+          invocation: () => certificateService.findById(event.args),
+        });
       } else if (method === 'findByResidence') {
         return await certificateService.findByResidence(event.args);
       } else if (method === 'createQRcode') {
-        return await this.safeRun({
-          context: context,
-          run: () => certificateService.createQRcode(event.args)
+        return await safeRunner.run({
+          invocation: () => certificateService.createQRcode(event.args),
+          roles: ['admin', 'superAdmin'],
         });
       } else if (method === 'checkIn') {
-        return await this.safeRun({
-          context: context,
-          run: () => certificateService.checkIn(event.args)
+        return await safeRunner.run({
+          invocation: () => certificateService.checkIn(event.args),
+          roles: ['checker', 'superAdmin'],
         });
       } else if (method === 'checkOut') {
-        return await this.safeRun({
-          context: context,
-          run: () => certificateService.checkOut(event.args)
+        return await safeRunner.run({
+          invocation: () => certificateService.checkOut(event.args),
+          roles: ['checker', 'superAdmin'],
         });
       } else if (method === 'certify') {
-        return await this.safeRun({
-          context: context,
-          run: () => certificateService.certify(event.args)
+        return await safeRunner.run({
+          invocation: () => certificateService.certify(event.args),
+          roles: ['admin', 'superAdmin'],
         });
       }
     case 'checkRecordService':
@@ -66,9 +66,9 @@ exports.main = async (event, context) => {
       } else if (method === 'listByBuilding') {
         return await residenceService.listByBuilding(event.args);
       } else if (method === 'batchCreate') {
-        return await this.safeRun({
-          context: context,
-          run: () => residenceService.batchCreate(event.args)
+        return await safeRunner.run({
+          invocation: () => residenceService.batchCreate(event.args),
+          roles: ['admin', 'superAdmin'],
         });
       }
     case 'userService':
@@ -77,47 +77,12 @@ exports.main = async (event, context) => {
       } else if (method === 'findByCertificate') {
         return await userService.findByCertificate(event.args);
       } else if (method === 'updateProfile') {
-        return await this.safeRun({
-          context: context,
-          run: () => userService.updateProfile(event.args)
+        return await safeRunner.run({
+          invocation: () => userService.updateProfile(event.args),
         });
       }
   }
 
   console.error(`Found invalid function call: ${JSON.stringify(event)}`);
   return new Error(`Found invalid funtion call: ${service}.${method}`);
-};
-
-exports.safeRun = async ({ context, run }) => {
-  const wx_open_id = cloud.getWXContext().OPENID;
-  const result = await new UserService().findBy({
-    criteria: {
-      wx_open_id: wx_open_id,
-    },
-    orderBy: [],
-    limit: 1
-  });
-  const users = result.data;
-  if (users.length <= 0) {
-    return new Error(`Cannot find user with wx_open_id: ${wx_open_id}`);
-  }
-
-  // inject user to context
-  context.user = users[0];
-  console.log(`Inject user: ${JSON.stringify(context.user)} into context.`);
-  // start tx
-  // const transaction = await db.startTransaction();
-  try {
-    // inject tx to context
-    // context.transaction = transaction;
-    // do run
-    const result = await run();
-    // try commit
-    // await transaction.commit();
-    return result;
-  } catch (error) {
-    // await transaction.rollback();
-    console.error(error);
-    return error;
-  }
 };

@@ -28,6 +28,19 @@ class CertificateService extends BaseService {
     return new Certificate(jsonObject);
   }
 
+  async findById(_id) {
+    const user = this.context.user;
+    if (!user) {
+      throw new Error(`User not exists in context`);
+    }
+
+    if (!user.role.checker && !user.role.superAdmin && user.certificate._id !== _id) {
+      throw new Error(`User: ${user._id} can only get own certificate.`);
+    }
+
+    return super.findById(_id);
+  }
+
   async findByResidence(residence) {
     if (!residence || !residence._id) {
       throw new Error(`Invalid residence: ${JSON.stringify(residence)} to find certificate.`);

@@ -12,7 +12,7 @@
     <view wx:if="{{certificate.status === 1}}">
       <van-image use-error-slot use-loading-slot src="{{certificate.qrcode_url}}" fit="contain" width="750rpx" height="750rpx">
         <text slot="error" vertical>加载失败</text>
-        <van-loading slot="loading" type="spinner" vertical />
+        <van-loading slot="loading" type="spinner" vertical size="50rpx" />
       </van-image>
     </view>
     <view wx:else>

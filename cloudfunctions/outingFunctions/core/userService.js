@@ -73,6 +73,7 @@ class UserService extends BaseService {
         name: user.name,
         contact_number: user.contact_number,
         residence: user.residence,
+        'role.resident': true,
       }
     ).then((result) => {
       return this.certificateService.findByResidence(user.residence)

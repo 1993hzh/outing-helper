@@ -14,12 +14,12 @@ class User {
   };
   // for role
   role = {
-    resident: true,
+    resident: undefined,
     checker: undefined,
     admin: undefined,
     superAdmin: undefined
   };
-  check_points = {};
+  check_points = undefined;
   managed_buildings = {};
   // for approval
   pending_record = {
