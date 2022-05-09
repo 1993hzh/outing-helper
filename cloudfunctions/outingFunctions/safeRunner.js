@@ -27,7 +27,8 @@ class SafeRunner {
       limit: 1
     });
     if (users.length <= 0) {
-      return new BizError('找不到做人的证据', wx_open_id);
+      console.error(`Cannot find user with wx_open_id: ${wx_open_id}`);
+      throw new BizError('找不到做人的证据');
     }
     // inject user to context
     const user = users[0];

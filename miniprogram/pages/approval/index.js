@@ -1,6 +1,7 @@
 // pages/approval/index.js
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
+import BizError from '../../utils/bizError';
 
 const app = getApp();
 
@@ -50,13 +51,22 @@ Page({
         method: 'list'
       }
     }).then((resp) => {
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
       this.setData({
         'buildingInput.buildings': resp.result.data,
         'buildingInput.loadBuildings': false,
       });
     }).catch((err) => {
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage, zIndex: 999999 });
+      } else {
+        Toast.fail({ message: '加载出错，请联系管理员', zIndex: 999999 });
+      }
       logger.error('Load buildings failed.', err)
-      Toast.fail({ message: '加载出错，请联系管理员', zIndex: 999999 });
     });
   },
 
@@ -83,10 +93,19 @@ Page({
         }
       }
     }).then((resp) => {
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
       Toast.success('批量创建成功');
     }).catch((err) => {
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage });
+      } else {
+        Toast.fail('批量创建出错，请联系管理员');
+      }
       logger.error(`Batch create residences for building: ${JSON.stringify(building)} failed.`, err);
-      Toast.fail('批量创建出错，请联系管理员');
     });
   }
 })

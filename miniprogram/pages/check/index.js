@@ -1,6 +1,7 @@
 // pages/check/index.js
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
+import BizError from '../../utils/bizError';
 
 const app = getApp();
 const queryString = require('query-string');
@@ -85,7 +86,12 @@ Page({
         args: this.data.certificate
       }
     }).then((resp) => {
-      const data = resp.result.data;
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
+      const data = result.data;
       const processedCheckRecord = this.processCheckRecord(data.checkRecord);
       this.data.checkRecords.push(processedCheckRecord);
       this.setData({
@@ -95,8 +101,12 @@ Page({
 
       Toast.clear();
     }).catch((err) => {
-      logger.error(JSON.stringify(err));
-      Toast.fail({ message: '检入发生错误，请联系管理员', zIndex: 999999, });
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+      } else {
+        Toast.fail({ message: '检入发生错误，请联系管理员', zIndex: 999999, });
+      }
+      logger.error(`checkIn: ${this.data.certificate._id} failed.`, err);
     });
   },
 
@@ -111,7 +121,12 @@ Page({
         args: this.data.certificate
       }
     }).then((resp) => {
-      const data = resp.result.data;
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
+      const data = result.data;
       const processedCheckRecord = this.processCheckRecord(data.checkRecord);
       this.data.checkRecords.push(processedCheckRecord);
       this.setData({
@@ -121,8 +136,12 @@ Page({
 
       Toast.clear();
     }).catch((err) => {
-      logger.error(JSON.stringify(err));
-      Toast.fail({ message: '检出发生错误，请联系管理员', zIndex: 999999, });
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+      } else {
+        Toast.fail({ message: '检出发生错误，请联系管理员', zIndex: 999999, });
+      }
+      logger.error(`checkOut: ${this.data.certificate._id} failed.}`, err);
     });
   },
 
@@ -149,7 +168,12 @@ Page({
         args: certId
       }
     }).then((resp) => {
-      let data = resp.result.data;
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
+      let data = result.data;
       logger.info(`Find certificate by id: ${certId} returned: ${JSON.stringify(data)}`);
       this.setData({
         certificate: data
@@ -164,7 +188,12 @@ Page({
         }
       });
     }).then((resp) => {
-      const data = resp.result.data;
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
+      const data = result.data;
       const displayData = data.map(e => this.processCheckRecord(e));
       logger.info(`Find checkRecord by certId: ${certId} returned: ${JSON.stringify(data)}`);
       this.setData({
@@ -173,9 +202,13 @@ Page({
       });
 
       Toast.clear();
-    }).catch((error) => {
-      logger.error(`Check cert by id: ${certId} failed.`, error);
-      Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
+    }).catch((err) => {
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+      } else {
+        Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
+      }
+      logger.error(`Check cert by id: ${certId} failed.`, err);
     });
   },
 

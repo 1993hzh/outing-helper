@@ -36,7 +36,8 @@ class CertificateService extends BaseService {
     }
 
     if (!user.role.checker && !user.role.superAdmin && user.certificate._id !== _id) {
-      throw new BizError('用户非法访问他人出行证.', user);
+      console.error(`User: ${user._id} trying to access certificate: ${_id}`);
+      throw new BizError('用户非法访问他人出行证.');
     }
 
     return await super.findById(_id);
@@ -104,7 +105,7 @@ class CertificateService extends BaseService {
 
   async checkIn(certificate) {
     if (!certificate || !certificate._id) {
-      throw new BizError('出行证不存在', certificate);
+      throw new BizError('出行证不存在');
     }
 
     const cert = new Certificate(certificate);
@@ -114,7 +115,7 @@ class CertificateService extends BaseService {
 
   async checkOut(certificate) {
     if (!certificate || !certificate._id) {
-      throw new BizError('出行证不存在', certificate);
+      throw new BizError('出行证不存在');
     }
 
     const cert = new Certificate(certificate);

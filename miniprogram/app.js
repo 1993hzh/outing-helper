@@ -1,6 +1,7 @@
 // app.js
 const { envList } = require('./envList.js');
 import * as logger from './utils/log';
+import BizError from './utils/bizError';
 
 App({
   globalData: {
@@ -32,6 +33,11 @@ App({
         method: 'login',
       }
     }).then((resp) => {
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
       const user = resp.result.data;
       if (!user) {
         throw new Error(`User login failed with no db data.`);

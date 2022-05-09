@@ -25,12 +25,13 @@ class CheckRecordService extends BaseService {
 
   async findByCertificate(certificate_id) {
     if (!certificate_id) {
-      throw new BizError('出行证不存在', certificate_id);
+      throw new BizError('出行证不存在');
     }
 
     const user = this.context.user;
     if (!user.role.checker && !user.role.superAdmin && user.certificate._id !== certificate_id) {
-      throw new BizError('用户非法访问他人出行记录.', user, certificate_id);
+      console.error(`User: ${user._id} trying to access checkRecord of certificate: ${_id}`);
+      throw new BizError('用户非法访问他人出行记录.');
     }
 
     const thisMonday = moment()

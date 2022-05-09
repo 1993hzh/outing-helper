@@ -1,6 +1,7 @@
 // pages/certificate/index.js
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
+import BizError from '../../utils/bizError';
 
 const app = getApp();
 
@@ -61,19 +62,26 @@ Page({
         args: certificate._id
       }
     }).then((resp) => {
-      const cert = resp.result.data;
-      loginUser.certificate.outing_count = cert.outing_count;
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
 
+      const cert = result.data;
+      loginUser.certificate.outing_count = cert.outing_count;
       this.setData({
         currentUser: loginUser,
         certificate: cert
       });
       this.getTabBar().dynamicResetWhenShow();
-
-      Toast.clear();
       wx.stopPullDownRefresh();
+      Toast.clear();
     }).catch((err) => {
-      Toast.fail({ message: '加载失败', forbidClick: true, });
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage, forbidClick: true, });
+      } else {
+        Toast.fail({ message: '加载失败', forbidClick: true, });
+      }
       logger.error(`Load certificate: ${certificate._id} failed.`, err);
     });
   },

@@ -1,6 +1,7 @@
 // pages/profile/profile.js
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
+import BizError from '../../utils/bizError';
 
 const app = getApp();
 const PHONE_REGEX = /^1[3-9]\d{9}$/;
@@ -78,13 +79,22 @@ Page({
         method: 'list'
       }
     }).then((resp) => {
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
       this.setData({
-        'residenceInputs.buildingInput.buildings': resp.result.data,
+        'residenceInputs.buildingInput.buildings': result.data,
         'residenceInputs.buildingInput.loadBuildings': false,
       });
     }).catch((err) => {
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+      } else {
+        Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
+      }
       logger.error('Load buildings failed.', err)
-      Toast.fail({ message: '加载出错，请联系管理员', zIndex: 999999 });
     });
   },
 
@@ -110,13 +120,22 @@ Page({
         args: currentBuilding
       }
     }).then((resp) => {
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
       this.setData({
         'residenceInputs.roomInput.loadResidences': false,
-        'residenceInputs.roomInput.residences': resp.result.data,
+        'residenceInputs.roomInput.residences': result.data,
       });
     }).catch((err) => {
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+      } else {
+        Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
+      }
       logger.error('Load buildings failed.', err)
-      Toast.fail({ message: '加载出错，请联系管理员', zIndex: 999999 });
     });
   },
 
@@ -181,15 +200,24 @@ Page({
         args: user
       }
     }).then((resp) => {
-      const updatedUser = resp.result.data;
+      const result = resp.result;
+      if (!result.success) {
+        throw new BizError(result.errorMessage);
+      }
+
+      const updatedUser = result.data;
       logger.info(`updateProfile returned: ${JSON.stringify(resp)}`);
       this.setData({
         user: updatedUser
       });
       app.globalData.loginUser = updatedUser;
     }).catch((err) => {
+      if (err instanceof BizError) {
+        Toast.fail({ message: err.errorMessage, });
+      } else {
+        Toast.fail('更新出错，请联系管理员');
+      }
       logger.error(`updateProfile for user: ${JSON.stringify(user)} failed.`, err);
-      Toast.fail('更新出错，请联系管理员');
     });
   },
 })
