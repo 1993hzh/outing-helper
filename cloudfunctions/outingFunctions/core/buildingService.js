@@ -1,3 +1,5 @@
+const BizError = require('../bizError')
+
 class BuildingService {
 
   #BUILT_IN = [

@@ -32,12 +32,11 @@ App({
         method: 'login',
       }
     }).then((resp) => {
-      const user = resp.result?.data;
+      const user = resp.result.data;
       if (!user) {
         throw new Error(`User login failed with no db data.`);
       }
-
-      logger.info(`User: ${JSON.stringify(user)} login succeed.`);
+      logger.info(`Login succeed, user: ${JSON.stringify(user)}`);
       this.globalData.loginUser = user;
       this.globalData.hasUser = true;
       return user;

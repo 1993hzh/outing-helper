@@ -1,3 +1,4 @@
+const BizError = require('../bizError')
 const CheckRecord = require('./checkRecord')
 
 const moment = require('moment')
@@ -38,7 +39,7 @@ class Certificate {
   checkOut(user) {
     console.info(`Check-out certificate: ${this._id}.`);
     if (this.status !== 1) {
-      throw new Error(`Invalid status for certificate: ${JSON.stringify(this)}`);
+      throw new BizError('出行证暂时无效，不可使用', this);
     }
 
     this.outing_count++;
@@ -59,7 +60,7 @@ class Certificate {
   checkIn(user) {
     console.info(`Check-in certificate: ${this._id}.`);
     if (this.status !== 1) {
-      throw new Error(`Invalid status for certificate: ${JSON.stringify(this)}`);
+      throw new BizError('出行证暂时无效，不可使用', this);
     }
 
     this.outing_count++;

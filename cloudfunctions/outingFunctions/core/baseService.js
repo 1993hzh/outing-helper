@@ -1,3 +1,4 @@
+const BizError = require('../bizError')
 const { nanoid } = require('nanoid')
 const moment = require('moment')
 moment.locale('zh-CN');
@@ -20,16 +21,13 @@ class BaseService {
   }
 
   async findById(_id) {
-    return this.db().collection(this.#collection).doc(_id).get()
-      .then((result) => {
-        const data = result.data;
-        result.data = this.transform(data);
-        return result;
-      });
+    const result = await this.db().collection(this.#collection).doc(_id).get();
+    const record = result.data;
+    return this.transform(record);
   }
 
   async findBy({ criteria, orderBy, limit }) {
-    var query = this.db().collection(this.#collection)
+    let query = this.db().collection(this.#collection)
       .where(_.and([
         {
           status: _.gte(0)
@@ -40,59 +38,55 @@ class BaseService {
       orderBy.forEach(e => query = query.orderBy(e.prop, e.type));
     }
     if (limit) {
-      query.limit(limit);
+      query = query.limit(limit);
     }
-    return query.get()
-      .then((result) => {
-        const data = result.data;
-        result.data = data.map(e => this.transform(e));
-        return result;
-      });
+
+    const result = await query.get();
+    const records = result.data;
+    return records.map(record => this.transform(record));
   }
 
   // return created object
   async insert(record) {
     const wxContext = cloud.getWXContext();
-
     record._id = nanoid();
     record.created_at = new Date();
     record.created_by = wxContext.OPENID;
     record.updated_at = new Date();
     record.updated_by = wxContext.OPENID;
-    return this.db().collection(this.#collection).add({ data: record })
-      .then(result => {
-        console.info(`Insert record: ${JSON.stringify(record)} with result: ${JSON.stringify(result)}`);
-        result.data = this.transform(record);
-        return result;
-      });
+
+    const result = await this.db().collection(this.#collection).add({ data: record });
+    console.info(`Insert record: ${JSON.stringify(record)} with result: ${JSON.stringify(result)}`);
+    return this.transform(record);
   }
 
-  // return successfully updated counts
+  // return after updated record if succeed
   async update(record, partial) {
-    if (!record._id || record.revision < 0) {
+    console.info(`Updating record: ${JSON.stringify(record)}, update: ${JSON.stringify(partial)}`);
+
+    const record_id = record._id;
+    const record_revision = record.revision;
+    if (!record_id || record_revision < 0) {
       throw new Error(`Trying to update invalid record: ${JSON.stringify(record)}.`);
     }
 
     partial.updated_at = new Date();
     partial.updated_by = cloud.getWXContext().OPENID;
-    partial.revision = record.revision + 1;
-    console.info(`Updating record: ${JSON.stringify(record)}, update: ${JSON.stringify(partial)}`);
-    return this.db().collection(this.#collection)
-      .where({ _id: record._id, revision: record.revision })
-      .update({ data: partial })
-      .then(result => {
-        console.info(`Updating record: ${record._id} returned: ${JSON.stringify(result)}`);
+    partial.revision = ++record.revision;
+    const updateResult = await this.db().collection(this.#collection)
+      .where({ _id: record_id, revision: record_revision })
+      .update({ data: partial });
+    if (updateResult.stats.updated <= 0) {
+      console.error(`Updating record: { id: ${record_id}, revision: ${record_revision} } failed: ${JSON.stringify(updateResult)}`);
+      throw new Error(`Update record: ${JSON.stringify(record)}failed.`);
+    }
 
-        if (result.stats.updated <= 0) {
-          throw new Error(`Update record: ${JSON.stringify(record)} failed.`);
-        }
-        record.revision++;
-        return result;
-      });
+    const result = { ...record, ...partial };
+    return this.transform(result);
   }
 
   async delete(record) {
-    return this.update(record, { status: -1 });
+    return await this.update(record, { status: -1 });
   }
 
   transform(jsonObject) {

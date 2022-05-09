@@ -51,7 +51,7 @@ Page({
       }
     }).then((resp) => {
       this.setData({
-        'buildingInput.buildings': resp.result,
+        'buildingInput.buildings': resp.result.data,
         'buildingInput.loadBuildings': false,
       });
     }).catch((err) => {
@@ -83,11 +83,7 @@ Page({
         }
       }
     }).then((resp) => {
-      if (resp.result.success) {
-        Toast.success('批量创建成功');
-      } else {
-        Toast.fail('批量创建出错，请联系管理员');
-      }
+      Toast.success('批量创建成功');
     }).catch((err) => {
       logger.error(`Batch create residences for building: ${JSON.stringify(building)} failed.`, err);
       Toast.fail('批量创建出错，请联系管理员');

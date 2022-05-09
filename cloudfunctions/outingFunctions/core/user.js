@@ -1,3 +1,5 @@
+const BizError = require('../bizError')
+
 class User {
 
   _id = undefined;

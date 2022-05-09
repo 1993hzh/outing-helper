@@ -1,3 +1,4 @@
+const BizError = require('../bizError')
 const BaseService = require('./baseService')
 const Certificate = require('./certificate')
 const CheckRecordService = require('./checkRecordService')
@@ -35,10 +36,10 @@ class CertificateService extends BaseService {
     }
 
     if (!user.role.checker && !user.role.superAdmin && user.certificate._id !== _id) {
-      throw new Error(`User: ${user._id} can only get own certificate.`);
+      throw new BizError('用户非法访问他人出行证.', user);
     }
 
-    return super.findById(_id);
+    return await super.findById(_id);
   }
 
   async findByResidence(residence) {
@@ -46,7 +47,7 @@ class CertificateService extends BaseService {
       throw new Error(`Invalid residence: ${JSON.stringify(residence)} to find certificate.`);
     }
 
-    return this.findBy({
+    return await this.findBy({
       criteria: {
         residence: {
           _id: residence._id
@@ -73,11 +74,8 @@ class CertificateService extends BaseService {
       room: residence.room
     };
 
-    const result = await this.insert(certificate);
-    const cert = result.data;
-    console.info(`Successfully certified: ${JSON.stringify(cert)}`);
-    this.createQRcode(cert);
-    return cert;
+    const cert = await this.insert(certificate);
+    return await this.createQRcode(cert);
   }
 
   async createQRcode(certificate) {
@@ -97,54 +95,45 @@ class CertificateService extends BaseService {
       });
       console.log(`Upload QRcode: ${certificate._id} succeed with result: ${JSON.stringify(upload)}`);
 
-      let filePath = upload.fileID;
-      certificate.qrcode_url = filePath;
-      await this.update(certificate, { qrcode_url: filePath });
-      return certificate;
+      return await this.update(certificate, { qrcode_url: upload.fileID });
     } catch (error) {
-      console.error(`create QR code for certificate: ${JSON.stringify(certificate)} failed.`, error);
+      console.error(`create QR code for certificate: ${certificate._id} failed.`, error);
       throw error;
     }
   }
 
   async checkIn(certificate) {
     if (!certificate || !certificate._id) {
-      throw new Error(`Invalid certificate:${JSON.stringify(certificate)} to checkin.`);
+      throw new BizError('出行证不存在', certificate);
     }
 
     const cert = new Certificate(certificate);
     const checkRecord = cert.checkIn({});// user not implemented
-    return this.persist(cert, checkRecord);
+    return await this.persist(cert, checkRecord);
   }
 
   async checkOut(certificate) {
     if (!certificate || !certificate._id) {
-      throw new Error(`Invalid certificate:${JSON.stringify(certificate)} to checkout.`);
+      throw new BizError('出行证不存在', certificate);
     }
 
     const cert = new Certificate(certificate);
     const checkRecord = cert.checkOut({});// user not implemented
-    return this.persist(cert, checkRecord);
+    return await this.persist(cert, checkRecord);
   }
 
   // private
   async persist(certificate, checkRecord) {
     try {
       const inserted = await this.checkRecordService.insert(checkRecord);
-      await this.update(certificate, { outing_count: certificate.outing_count });
+      const result = await this.update(certificate, { outing_count: certificate.outing_count });
       return {
-        success: true,
-        data: {
-          certificate: certificate,
-          checkRecord: inserted.data
-        }
+        certificate: result,
+        checkRecord: inserted,
       };
     } catch (error) {
       console.error(`certificate: ${JSON.stringify(certificate)} persist failed.`, error);
-      return {
-        success: false,
-        error: error
-      };
+      throw error
     }
   }
 }

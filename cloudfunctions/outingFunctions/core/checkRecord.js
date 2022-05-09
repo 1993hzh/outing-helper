@@ -1,3 +1,5 @@
+const BizError = require('../bizError')
+
 class CheckRecord {
 
   _id = undefined;
@@ -25,18 +27,18 @@ class CheckRecord {
     Object.assign(this, jsonObject);
   }
 
-  addTo(certificate) {
-    if (!certificate) {
-      throw new Error(`Found invalid certificate: ${certificate}`);
-    }
+  // addTo(certificate) {
+  //   if (!certificate) {
+  //     throw new Error(`Found invalid certificate: ${certificate}`);
+  //   }
 
-    certificate.outingRecords.push({
-      _id: this._id,
-      user: this.user,
-      checked_by: this.checked_by,
-      check_type: this.check_type
-    });
-  }
+  //   certificate.outingRecords.push({
+  //     _id: this._id,
+  //     user: this.user,
+  //     checked_by: this.checked_by,
+  //     check_type: this.check_type
+  //   });
+  // }
 }
 
 module.exports = CheckRecord;

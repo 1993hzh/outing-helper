@@ -1,3 +1,4 @@
+const BizError = require('../bizError')
 const BaseService = require('./baseService')
 const BuidingService = require('./buildingService')
 
@@ -25,7 +26,7 @@ class ResidenceService extends BaseService {
       throw new Error(`Invalid building: ${JSON.stringify(building)}.`);
     }
 
-    return this.findBy({
+    return await this.findBy({
       criteria: {
         building: { id: building.id },
       },
@@ -50,21 +51,18 @@ class ResidenceService extends BaseService {
       room: room,
       status: 0,
     };
-    return this.findBy({
+    const exists = await this.findBy({
       criteria: partialResidence,
       orderBy: [],
       limit: 1,
-    }).then((result) => {
-      let exists = result.data;
-      if (exists && exists.length > 0) {
-        console.info(`Return existing Residence: ${JSON.stringify(exists)}`);
-        result.data = exists[0];
-        return result;
-      }
-
-      console.info(`Inserting Residence: ${JSON.stringify(partialResidence)}`);
-      return super.insert(partialResidence);
     });
+    if (exists && exists.length > 0) {
+      console.info(`Return existing Residence: ${JSON.stringify(exists)}`);
+      return exists[0];
+    }
+
+    console.info(`Inserting Residence: ${JSON.stringify(partialResidence)}`);
+    return await super.insert(partialResidence);
   }
 
   async batchCreate({ building, rooms }) {
@@ -72,16 +70,12 @@ class ResidenceService extends BaseService {
       throw new Error(`Invalid params: ${building}, ${rooms}.`);
     }
 
-    const data = rooms.split("；").map(room => {
+    return rooms.split("；").map(async (room) => {
       return this.create({
         building: building,
         room: room
       });
     });
-    return {
-      success: true,
-      data: data,
-    }
   }
 }
 

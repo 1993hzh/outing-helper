@@ -1,3 +1,4 @@
+const BizError = require('../bizError')
 const BaseService = require('./baseService')
 const CertificateService = require('./certificateService')
 const User = require('./user')
@@ -33,7 +34,7 @@ class UserService extends BaseService {
       throw new Error('Found invalid wxContext');
     }
 
-    return this.findBy({
+    const result = await this.findBy({
       criteria: {
         wx_open_id: wx_open_id
       },
@@ -41,14 +42,14 @@ class UserService extends BaseService {
         { prop: 'created_at', type: 'desc' }
       ],
       limit: 1
-    }).then((result) => {
-      if (result.data.length > 0) {
-        result.data = result.data[0];
-        return result;
-      } else {
-        return this.create();
-      }
     });
+
+    if (result.length > 0) {
+      console.log('User exists', JSON.stringify(result));
+      return result[0];
+    } else {
+      return await this.create();
+    }
   }
 
   async create() {
@@ -60,7 +61,7 @@ class UserService extends BaseService {
 
     const user = new User();
     user.wx_open_id = wx_open_id;
-    return this.insert(user);
+    return await this.insert(user);
   }
 
   async updateProfile(user) {
@@ -68,32 +69,24 @@ class UserService extends BaseService {
       throw new Error(`Found invalid user: ${JSON.stringify(user)}.`);
     }
 
-    return this.update(user,
-      {
-        name: user.name,
-        contact_number: user.contact_number,
-        residence: user.residence,
-        'role.resident': true,
-      }
-    ).then((result) => {
-      return this.certificateService.findByResidence(user.residence)
-    }).then((result) => {
-      const certs = result.data;
-      if (certs.length <= 0) {
-        return this.certificateService.certify(user.residence);
-      } else {
-        return result.data[0];
-      }
-    }).then((result) => {
-      console.log(`Find or certify a cert: ${JSON.stringify(result)}`);
-      const cert = result;
-      cert.bindTo(user);
-      return this.update(user,
-        {
-          certificate: {
-            _id: cert._id,
-          },
-        });
+    const updatedUser = await this.update(user, {
+      name: user.name,
+      contact_number: user.contact_number,
+      residence: user.residence,
+      'role.resident': true,
+    });
+
+    const certs = await this.certificateService.findByResidence(updatedUser.residence)
+    let certificate = certs[0];
+    if (!certificate) {
+      certificate = await this.certificateService.certify(updatedUser.residence);
+      console.log(`Create a new cert: ${JSON.stringify(certificate)}`);
+    }
+    certificate.bindTo(user);
+    return await this.update(updatedUser, {
+      certificate: {
+        _id: certificate._id,
+      },
     });
   }
 
@@ -102,7 +95,7 @@ class UserService extends BaseService {
       throw new Error('Found empty certificate id.');
     }
 
-    return this.findBy({
+    return await this.findBy({
       criteria: {
         certificate: {
           _id: certificate_id

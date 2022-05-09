@@ -1,3 +1,4 @@
+const BizError = require('../bizError')
 const BaseService = require('./baseService')
 const CheckRecord = require('./checkRecord')
 
@@ -24,13 +25,18 @@ class CheckRecordService extends BaseService {
 
   async findByCertificate(certificate_id) {
     if (!certificate_id) {
-      throw new Error('Found empty certificate id.');
+      throw new BizError('出行证不存在', certificate_id);
+    }
+
+    const user = this.context.user;
+    if (!user.role.checker && !user.role.superAdmin && user.certificate._id !== certificate_id) {
+      throw new BizError('用户非法访问他人出行记录.', user, certificate_id);
     }
 
     const thisMonday = moment()
       .weekday(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
       .toDate();
-    return this.findBy({
+    return await this.findBy({
       criteria: {
         certificate_id: certificate_id,
         created_at: _.gte(thisMonday)

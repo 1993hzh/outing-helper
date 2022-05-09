@@ -79,7 +79,7 @@ Page({
       }
     }).then((resp) => {
       this.setData({
-        'residenceInputs.buildingInput.buildings': resp.result,
+        'residenceInputs.buildingInput.buildings': resp.result.data,
         'residenceInputs.buildingInput.loadBuildings': false,
       });
     }).catch((err) => {
@@ -185,7 +185,8 @@ Page({
       logger.info(`updateProfile returned: ${JSON.stringify(resp)}`);
       this.setData({
         user: updatedUser
-      })
+      });
+      app.globalData.loginUser = updatedUser;
     }).catch((err) => {
       logger.error(`updateProfile for user: ${JSON.stringify(user)} failed.`, err);
       Toast.fail('更新出错，请联系管理员');
