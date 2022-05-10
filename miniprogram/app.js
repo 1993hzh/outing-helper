@@ -12,8 +12,11 @@ App({
   _loginUserWatchers: [],
 
   onLaunch: function () {
+    const accountInfo = wx.getAccountInfoSync();
+    logger.info(`miniprogram info: ${JSON.stringify(accountInfo?.miniProgram)}`)
+
     if (!wx.cloud) {
-      console.error('请使用 2.2.3 或以上的基础库以使用云能力');
+      logger.error('请使用 2.2.3 或以上的基础库以使用云能力');
     } else {
       wx.cloud.init({
         env: envList[0],

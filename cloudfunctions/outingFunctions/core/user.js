@@ -4,6 +4,8 @@ class User {
 
   _id = undefined;
   wx_open_id = '';
+  wx_nick_name = undefined;
+  wx_avatar_url = undefined;
   name = '';
   contact_number = '';
   residence = {
@@ -21,11 +23,12 @@ class User {
     admin: undefined,
     superAdmin: undefined
   };
-  check_points = undefined;
   managed_buildings = {};
   // for approval
-  pending_record = {
+  pending_data = {
     _id: undefined,
+    wx_nick_name: undefined,
+    wx_avatar_url: undefined,
     name: undefined,
     contact_number: undefined,
     residence: {
@@ -37,7 +40,7 @@ class User {
       _id: undefined
     },
   };
-  status = 0;// -1: deleted, 0: valid, 10: hasPendingRecord
+  status = 0;// -1: deleted, 0: initial, 1: valid, 10: hasPendingRecord
   revision = 0;
   created_at = undefined;
   created_by = undefined;

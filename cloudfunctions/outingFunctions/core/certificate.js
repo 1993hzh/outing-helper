@@ -31,6 +31,10 @@ class Certificate {
 
   bindTo(user) {
     console.info(`Binding certificate: ${this._id} to user: ${JSON.stringify(user)}`);
+    if (!user.certificate) {
+      user.certificate = {};
+    }
+    
     user.certificate._id = this._id;
     console.info(`Binding certificate: ${this._id} succeed.`);
     return user;

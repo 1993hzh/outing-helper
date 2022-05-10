@@ -64,16 +64,24 @@ class UserService extends BaseService {
     return await this.insert(user);
   }
 
-  async updateProfile(user) {
-    if (!user || !user.name || !user.contact_number || !user.residence) {
-      throw new Error(`Found invalid user: ${JSON.stringify(user)}.`);
+  async updateProfile(userProfile) {
+    if (!userProfile || !userProfile.name || !userProfile.contact_number || !userProfile.residence) {
+      throw new Error(`Found invalid user: ${JSON.stringify(userProfile)}.`);
     }
 
+    const user = this.context.user;
     const updatedUser = await this.update(user, {
-      name: user.name,
-      contact_number: user.contact_number,
-      residence: user.residence,
+      wx_nick_name: userProfile.wx_nick_name,
+      wx_avatar_url: userProfile.wx_avatar_url,
+      name: userProfile.name,
+      contact_number: userProfile.contact_number,
+      residence: {
+        _id: userProfile.residence._id,
+        building: userProfile.residence.building,
+        room: userProfile.residence.room
+      },
       'role.resident': true,
+      status: 1,
     });
 
     const certs = await this.certificateService.findByResidence(updatedUser.residence)

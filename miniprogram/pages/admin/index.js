@@ -22,7 +22,9 @@ Page({
 
   onReady() { },
 
-  onShow() { },
+  onShow() {
+    this.getTabBar().onPageShow();
+  },
 
   onPullDownRefresh() { },
 

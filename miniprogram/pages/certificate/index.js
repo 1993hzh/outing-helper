@@ -15,21 +15,21 @@ Page({
   onLoad(options) {
     if (!app.globalData.hasUser) {// user not login
       Toast.loading({ message: '正在登录', forbidClick: true, });
-      app.watchUserLogin((user) => {
-        Toast.clear();
-        this.data.currentUser = user;
-        this.loadCertificate();
-      });
     } else {
       this.data.currentUser = app.globalData.loginUser;
       this.loadCertificate();
     }
+    app.watchUserLogin((user) => {
+      Toast.clear();
+      this.data.currentUser = user;
+      this.loadCertificate();
+    });
   },
 
   onReady() { },
 
   onShow() {
-    this.getTabBar().dynamicResetWhenShow();
+    this.getTabBar().onPageShow();
   },
 
   onPullDownRefresh() {
@@ -73,7 +73,6 @@ Page({
         currentUser: loginUser,
         certificate: cert
       });
-      this.getTabBar().dynamicResetWhenShow();
       wx.stopPullDownRefresh();
       Toast.clear();
     }).catch((err) => {

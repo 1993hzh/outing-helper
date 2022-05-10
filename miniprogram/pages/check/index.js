@@ -17,19 +17,20 @@ Page({
   onLoad(options) {
     if (!app.globalData.hasUser) {// user not login
       Toast.loading({ message: '正在加载', forbidClick: true, });
-      app.watchUserLogin((user) => {
-        Toast.clear();
-        this.onScanQRcode(options);
-      });
     } else {
       this.onScanQRcode(options);
     }
+    
+    app.watchUserLogin((user) => {
+      Toast.clear();
+      this.onScanQRcode(options);
+    });
   },
 
   onReady() { },
 
   onShow() {
-    this.getTabBar().dynamicResetWhenShow();
+    this.getTabBar().onPageShow();
   },
 
   onShareAppMessage() {

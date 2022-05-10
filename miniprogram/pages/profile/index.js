@@ -9,46 +9,60 @@ const PHONE_REGEX = /^1[3-9]\d{9}$/;
 Page({
 
   data: {
-    user: {},
-    nameInputError: false,
-    contactInputError: false,
-    buildingInputError: false,
-    roomInputError: false,
-    residenceInputs: {
-      currentBuilding: {},
-      currentResidence: {},
-      buildingErrorMsg: '',
-      showResidencePopup: false,
-      buildingInput: {
-        showBuildingPicker: false,
-        loadBuildings: true,
-        buildings: [],
-      },
-      roomInput: {
-        showResidencePicker: false,
-        loadResidences: true,
-        residences: [],
-      }
-    }
+    switcher: {
+      show: false,
+      checked: false,
+    },
+    editable: true,
+    userStatus: 0,
+    buildingInput: {
+      error: false,
+      current: {},
+      showPicker: false,
+      loading: true,
+      values: [],
+    },
+    roomInput: {
+      error: false,
+      current: {},
+      showPicker: false,
+      loading: true,
+      values: [],
+    },
+    nameInput: {
+      error: false,
+      current: '',
+      show: false,
+    },
+    contactInput: {
+      error: false,
+      current: '',
+      show: false,
+    },
+    wxProfileInput: {
+      error: false,
+      nickName: '',
+      avatarUrl: '',
+    },
   },
 
   onLoad(options) {
     if (!app.globalData.hasUser) {// user not login
-      Toast.loading({ message: '正在加载', forbidClick: true, });
-
-      app.watchUserLogin((user) => {
-        Toast.clear();
-        this.setData({ user: user });
-      });
+      Toast.loading({ message: '正在登录', forbidClick: true, });
     } else {
-      this.setData({ user: app.globalData.loginUser });
+      this.init({ user: app.globalData.loginUser });
     }
+
+    app.watchUserLogin((user) => {
+      Toast.clear();
+      this.init({ user: user });
+    });
   },
 
   onReady() { },
 
   onShow() {
-    this.getTabBar().dynamicResetWhenShow();
+    this.getTabBar().onPageShow();
   },
 
   onShareAppMessage() {
@@ -57,20 +71,75 @@ Page({
     }
   },
 
+  onPullDownRefresh() {
+    app.userLogin()
+      .then((result) => {
+        wx.stopPullDownRefresh();
+      })
+      .catch((err) => {
+        wx.stopPullDownRefresh();
+        Toast.fail({ message: '刷新失败，请联系管理员', zIndex: 999999, });
+        logger.error(`User login failed.`, err);
+      });
+  },
+
+  init({ user: user }) {
+    if (!user) {
+      user = app.globalData.loginUser;
+    }
+
+    if (user?.status === 0) {
+      return;
+    }
+
+    this.setData({
+      switcher: {
+        show: user?.status === 10,
+        checked: false,
+      },
+      editable: false,
+      userStatus: user?.status,
+      'buildingInput.current': user?.residence?.building,
+      'roomInput.current': user?.residence,
+      'nameInput.current': user?.name,
+      'nameInput.show': true,
+      'contactInput.current': user?.contact_number,
+      'contactInput.show': true,
+      'wxProfileInput.nickName': user?.wx_nick_name,
+      'wxProfileInput.avatarUrl': user?.wx_avatar_url,
+    });
+  },
+
+  onClickSwitch({ detail }) {
+    const user = app.globalData.loginUser;
+    const data = detail ? user?.pending_data : user;
+    this.setData({
+      'switcher.checked': detail,
+      editable: false,
+      userStatus: user?.status,
+      'buildingInput.current': data?.residence?.building,
+      'roomInput.current': data?.residence,
+      'nameInput.current': data?.name,
+      'nameInput.show': true,
+      'contactInput.current': data?.contact_number,
+      'contactInput.show': true,
+      'wxProfileInput.nickName': data?.wx_nick_name,
+      'wxProfileInput.avatarUrl': data?.wx_avatar_url,
+    });
+  },
+
   onClickBuildingInput() {
     if (this.data.buildings?.length > 0) {
       this.setData({
-        'residenceInputs.showResidencePopup': true,
-        'residenceInputs.buildingInput.showBuildingPicker': true,
-        'residenceInputs.buildingInput.loadBuildings': false,
+        'buildingInput.showPicker': true,
+        'buildingInput.loading': false,
       });
       return;
     }
 
     this.setData({
-      'residenceInputs.showResidencePopup': true,
-      'residenceInputs.buildingInput.showBuildingPicker': true,
-      'residenceInputs.buildingInput.loadBuildings': true,
+      'buildingInput.showPicker': true,
+      'buildingInput.loading': true,
     });
     wx.cloud.callFunction({
       name: 'outingFunctions',
@@ -85,10 +154,11 @@ Page({
       }
 
       this.setData({
-        'residenceInputs.buildingInput.buildings': result.data,
-        'residenceInputs.buildingInput.loadBuildings': false,
+        'buildingInput.loading': false,
+        'buildingInput.values': result.data,
       });
     }).catch((err) => {
+      this.setData({ 'buildingInput.loading': false });
       if (err instanceof BizError) {
         Toast.fail({ message: err.message, zIndex: 999999, });
       } else {
@@ -99,18 +169,17 @@ Page({
   },
 
   onClickRoomInput() {
-    const currentBuilding = this.data.residenceInputs.currentBuilding;
+    const currentBuilding = this.data.buildingInput.current;
     if (!currentBuilding?.id) {
       this.setData({
-        'residenceInputs.buildingErrorMsg': '请先选择楼栋号',
+        'buildingInput.error': true,
       });
       return;
     }
 
     this.setData({
-      'residenceInputs.showResidencePopup': true,
-      'residenceInputs.roomInput.showResidencePicker': true,
-      'residenceInputs.roomInput.loadResidences': true,
+      'roomInput.showPicker': true,
+      'roomInput.loading': true,
     });
     wx.cloud.callFunction({
       name: 'outingFunctions',
@@ -126,78 +195,106 @@ Page({
       }
 
       this.setData({
-        'residenceInputs.roomInput.loadResidences': false,
-        'residenceInputs.roomInput.residences': result.data,
+        'roomInput.loading': false,
+        'roomInput.values': result.data,
       });
     }).catch((err) => {
+      this.setData({ 'roomInput.loading': false });
       if (err instanceof BizError) {
         Toast.fail({ message: err.message, zIndex: 999999, });
       } else {
         Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
       }
-      logger.error('Load buildings failed.', err)
+      logger.error('Load residences failed.', err)
     });
   },
 
   onClosePopup() {
     this.setData({
-      'residenceInputs.showResidencePopup': false,
-      'residenceInputs.buildingInput.showBuildingPicker': false,
-      'residenceInputs.roomInput.showResidencePicker': false,
+      'buildingInput.showPicker': false,
+      'roomInput.showPicker': false,
     });
   },
 
   onBuildingPickerConfirm(event) {
-    const picker = event.detail;
-    this.setData({
-      'residenceInputs.buildingErrorMsg': '',
-      'residenceInputs.currentBuilding': picker.value,
-    });
+    const value = event.detail?.value;
+    if (value && value.id) {
+      this.setData({
+        'buildingInput.error': false,
+        'buildingInput.current': value,
+        'roomInput.current': {},
+      });
+    }
     this.onClosePopup();
   },
 
-  onResidencePickerConfirm(event) {
-    const picker = event.detail;
-    this.setData({
-      'residenceInputs.currentResidence': picker.value
-    });
+  onRoomPickerConfirm(event) {
+    const value = event.detail?.value;
+    if (value && value._id) {
+      this.setData({
+        'roomInput.error': false,
+        'roomInput.current': value,
+        'nameInput.show': true,
+        'contactInput.show': true,
+      });
+    }
     this.onClosePopup();
+  },
+
+  onClickGetUserProfile(e) {
+    wx.getUserProfile({
+      desc: '用于完善出入信息以方便后续审核',
+    }).then((resp) => {
+      const userInfo = resp.userInfo;
+      this.setData({
+        'wxProfileInput.nickName': userInfo.nickName,
+        'wxProfileInput.avatarUrl': userInfo.avatarUrl,
+        'wxProfileInput.error': false,
+      });
+    }).catch((err) => {
+      this.setData({ 'wxProfileInput.error': true, });
+      logger.error(err);
+    })
+  },
+
+  onResetProfile(event) {
+    this.setData({ editable: true });
   },
 
   onSubmitProfile(event) {
     const formValues = event.detail.value;
-    const residence = this.data.residenceInputs.currentResidence;
+    const buildingInputError = !formValues.building?.trim();
+    const roomInputError = !formValues.room?.trim();
     const nameInputError = !formValues.userName?.trim();
     const contactInputError = !PHONE_REGEX.test(formValues.contactNumber);
-    const residenceInputError = !residence?._id;
+    const wxProfileError = !formValues.nickName?.trim();
     this.setData({
-      nameInputError: nameInputError,
-      contactInputError: contactInputError,
-      residenceInputError: residenceInputError,
+      'buildingInput.error': buildingInputError,
+      'roomInput.error': roomInputError,
+      'nameInput.error': nameInputError,
+      'contactInput.error': contactInputError,
+      'wxProfileInput.error': wxProfileError,
     });
 
-    if (nameInputError || contactInputError || residenceInputError) {
+    if (nameInputError || contactInputError || buildingInputError || roomInputError || wxProfileError) {
       return;
     }
 
-    const user = this.data.user;
-    if (!user?._id) {
-      return;
-    }
-
-    user.name = formValues.userName;
-    user.contact_number = formValues.contactNumber;
-    user.residence = {
-      _id: residence._id,
-      building: residence.building,
-      room: residence.room
-    };
+    const residence = this.data.roomInput.current;
+    const wxProfile = this.data.wxProfileInput;
+    const user = app.globalData.loginUser;
     wx.cloud.callFunction({
       name: 'outingFunctions',
       data: {
         service: 'userService',
         method: 'updateProfile',
-        args: user
+        args: {
+          wx_nick_name: wxProfile.nickName,
+          wx_avatar_url: wxProfile.avatarUrl,
+          name: formValues.userName,
+          contact_number: formValues.contactNumber,
+          residence: residence,
+        },
       }
     }).then((resp) => {
       const result = resp.result;
@@ -205,12 +302,8 @@ Page({
         throw new BizError(result.errorMessage);
       }
 
-      const updatedUser = result.data;
+      app.globalData.loginUser = result.data;//TODO
       logger.info(`updateProfile returned: ${JSON.stringify(resp)}`);
-      this.setData({
-        user: updatedUser
-      });
-      app.globalData.loginUser = updatedUser;
     }).catch((err) => {
       if (err instanceof BizError) {
         Toast.fail({ message: err.message, });

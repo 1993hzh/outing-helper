@@ -1,4 +1,4 @@
 /* pages/profile/profile.wxss */
-.submit-button {
+.form-button {
   margin-top: 20rpx;
 }
