@@ -1,7 +1,7 @@
 <van-toast id="van-toast" />
 <!-- scan part -->
 <view>
-    <van-empty description="扫描出行证二维码" />
+    <van-empty description="扫描出入证二维码" />
     <van-button round block type="primary" size="large" class="scan-button" icon="scan" bind:click="onClickScan">
         扫一扫
     </van-button>

@@ -34,7 +34,7 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: '出行检查'
+      title: '出入检查'
     }
   },
 
@@ -102,7 +102,7 @@ Page({
       Toast.clear();
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+        Toast.fail({ message: err.message, zIndex: 999999, });
       } else {
         Toast.fail({ message: '检入发生错误，请联系管理员', zIndex: 999999, });
       }
@@ -137,7 +137,7 @@ Page({
       Toast.clear();
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+        Toast.fail({ message: err.message, zIndex: 999999, });
       } else {
         Toast.fail({ message: '检出发生错误，请联系管理员', zIndex: 999999, });
       }
@@ -204,7 +204,7 @@ Page({
       Toast.clear();
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+        Toast.fail({ message: err.message, zIndex: 999999, });
       } else {
         Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
       }

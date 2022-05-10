@@ -40,7 +40,7 @@ class Certificate {
     console.info(`Check-out certificate: ${this._id}.`);
     if (this.status !== 1) {
       console.error(`Cannot do checkOut for invalid certificate: ${JSON.stringify(this)}`);
-      throw new BizError('出行证暂时无效，不可使用');
+      throw new BizError('出入证暂时无效，不可使用');
     }
 
     this.outing_count++;
@@ -62,7 +62,7 @@ class Certificate {
     console.info(`Check-in certificate: ${this._id}.`);
     if (this.status !== 1) {
       console.error(`Cannot do checkOut for invalid certificate: ${JSON.stringify(this)}`);
-      throw new BizError('出行证暂时无效，不可使用');
+      throw new BizError('出入证暂时无效，不可使用');
     }
 
     this.outing_count++;

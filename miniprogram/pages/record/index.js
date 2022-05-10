@@ -30,7 +30,7 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: '出行记录'
+      title: '出入记录'
     }
   },
 
@@ -68,7 +68,7 @@ Page({
       Toast.clear();
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, });
+        Toast.fail({ message: err.message, });
       } else {
         Toast.fail('加载出错，请联系管理员');
       }

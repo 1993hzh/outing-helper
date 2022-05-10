@@ -1,4 +1,4 @@
-// pages/approval/index.js
+// pages/admin/index.js
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
 import BizError from '../../utils/bizError';
@@ -62,7 +62,7 @@ Page({
       });
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, zIndex: 999999 });
+        Toast.fail({ message: err.message, zIndex: 999999 });
       } else {
         Toast.fail({ message: '加载出错，请联系管理员', zIndex: 999999 });
       }
@@ -101,7 +101,7 @@ Page({
       Toast.success('批量创建成功');
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage });
+        Toast.fail({ message: err.message });
       } else {
         Toast.fail('批量创建出错，请联系管理员');
       }

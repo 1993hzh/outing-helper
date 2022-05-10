@@ -1,25 +1,27 @@
 <van-toast id="van-toast" />
 
-<view wx:if="{{checkRecords.length <= 0}}">
-  <van-empty description="暂无出行记录" />
-</view>
 <scroll-view scroll-y="true"
     refresher-triggered="{{isRefreshing}}"
     refresher-enabled="true"
     bindrefresherrefresh="onScrollRefresh"
     enable-back-to-top="true"
     style="height: calc(90vh - env(safe-area-inset-bottom));;">
-  <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
-    <van-cell center value="{{item.displayDateTime}}" use-label-slot="{{true}}" size="large">
-      <view slot="title">
-        <van-tag wx:if="{{item.check_type === 0}}" type="danger">出</van-tag>
-        <van-tag wx:if="{{item.check_type === 1}}" type="success">进</van-tag>
-        {{item.user.name}}
-      </view>
-      <view slot="label">
-        {{item.user.residence.building.name + item.user.residence.room}}
-      </view>
-      <van-icon slot="right-icon" name="clock-o" />
-    </van-cell>
-  </van-cell-group>
+    <!-- empty part -->
+    <view wx:if="{{checkRecords.length <= 0}}">
+      <van-empty description="暂无出入记录" />
+    </view>
+    <!-- records part -->
+    <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
+      <van-cell center value="{{item.displayDateTime}}" use-label-slot="{{true}}" size="large">
+        <view slot="title">
+          <van-tag wx:if="{{item.check_type === 0}}" type="danger">出</van-tag>
+          <van-tag wx:if="{{item.check_type === 1}}" type="success">进</van-tag>
+          {{item.user.name}}
+        </view>
+        <view slot="label">
+          {{item.user.residence.building.name + item.user.residence.room}}
+        </view>
+        <van-icon slot="right-icon" name="clock-o" />
+      </van-cell>
+    </van-cell-group>
 </scroll-view>

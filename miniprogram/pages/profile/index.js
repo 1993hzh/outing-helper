@@ -53,7 +53,7 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: '出行信息'
+      title: '出入信息'
     }
   },
 
@@ -90,7 +90,7 @@ Page({
       });
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+        Toast.fail({ message: err.message, zIndex: 999999, });
       } else {
         Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
       }
@@ -131,7 +131,7 @@ Page({
       });
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, zIndex: 999999, });
+        Toast.fail({ message: err.message, zIndex: 999999, });
       } else {
         Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
       }
@@ -213,7 +213,7 @@ Page({
       app.globalData.loginUser = updatedUser;
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, });
+        Toast.fail({ message: err.message, });
       } else {
         Toast.fail('更新出错，请联系管理员');
       }

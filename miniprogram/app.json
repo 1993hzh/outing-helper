@@ -4,7 +4,7 @@
     "pages/record/index",
     "pages/check/index",
     "pages/profile/index",
-    "pages/approval/index"
+    "pages/admin/index"
   ],
   "tabBar": {
     "custom": true,
@@ -22,7 +22,7 @@
         "pagePath": "pages/profile/index"
       },
       {
-        "pagePath": "pages/approval/index"
+        "pagePath": "pages/admin/index"
       }
     ]
   },

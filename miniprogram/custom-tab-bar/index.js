@@ -11,7 +11,7 @@ Component({
         name: 'certificate',
         url: "/pages/certificate/index",
         icon: "home-o",
-        text: "出行证",
+        text: "出入证",
         placeholder: true,
         hide: false
       },
@@ -20,7 +20,7 @@ Component({
         url: "/pages/record/index",
         icon: "records",
         info: 0,
-        text: "出行记录",
+        text: "出入记录",
         placeholder: true,
         hide: false
       },
@@ -28,7 +28,7 @@ Component({
         name: 'check',
         url: "/pages/check/index",
         icon: "eye-o",
-        text: "出行检查",
+        text: "出入检查",
         placeholder: true,
         hide: true
       },
@@ -36,15 +36,15 @@ Component({
         name: 'profile',
         url: "/pages/profile/index",
         icon: "user-o",
-        text: "出行信息",
+        text: "出入信息",
         placeholder: true,
         hide: false
       },
       {
-        name: 'approval',
-        url: "/pages/approval/index",
+        name: 'admin',
+        url: "/pages/admin/index",
         icon: "sign",
-        text: "信息审核",
+        text: "出入管理",
         placeholder: true,
         hide: true
       }

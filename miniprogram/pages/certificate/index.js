@@ -38,7 +38,7 @@ Page({
 
   onShareAppMessage() {
     return {
-      title: '出行证'
+      title: '出入证'
     }
   },
 
@@ -52,7 +52,7 @@ Page({
       return;
     }
 
-    Toast.loading({ message: '加载出行证...', forbidClick: true, });
+    Toast.loading({ message: '加载出入证...', forbidClick: true, });
 
     wx.cloud.callFunction({
       name: 'outingFunctions',
@@ -78,7 +78,7 @@ Page({
       Toast.clear();
     }).catch((err) => {
       if (err instanceof BizError) {
-        Toast.fail({ message: err.errorMessage, forbidClick: true, });
+        Toast.fail({ message: err.message, forbidClick: true, });
       } else {
         Toast.fail({ message: '加载失败', forbidClick: true, });
       }

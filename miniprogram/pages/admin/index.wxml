@@ -1,4 +1,4 @@
-<!--pages/approval/index.wxml-->
+<!--pages/admin/index.wxml-->
 <van-toast id="van-toast"/>
 <view>
   <form bindsubmit="onSubmitResidences" bindreset="">
