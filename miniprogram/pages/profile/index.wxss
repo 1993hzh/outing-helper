@@ -2,3 +2,11 @@
 .form-button {
   margin-top: 20rpx;
 }
+
+.custom-cell-title {
+  display: flex;
+}
+
+.custom-title-text {
+  margin-right: 4rpx;
+}

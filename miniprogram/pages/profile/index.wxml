@@ -1,94 +1,38 @@
 <!--pages/profile/profile.wxml-->
-<van-toast id="van-toast"/>
+<van-toast id="van-toast" />
 
 <!-- inputs part -->
 <view>
-  <view wx:if="{{ switcher.show }}">
+  <block wx:if="{{ switcher.show }}">
     <van-cell-group>
-      <van-cell title="查看待审核数据" center>
-        <van-switch checked="{{ switcher.checked }}" bind:change="onClickSwitch" />
+      <van-cell center use-label-slot>
+        <view slot="title" class="custom-cell-title">
+          <view class="van-cell-text custom-title-text">显示修改数据</view>
+          <van-tag wx:if="{{ switcher.checked && user.pending.status === -1 }}" type="danger">已驳回</van-tag>
+          <van-tag wx:if="{{ switcher.checked && user.pending.status === 0 }}" type="primary">待审核</van-tag>
+        </view>
+        <view>
+          <van-switch checked="{{ switcher.checked }}" bind:change="onClickSwitch" />
+        </view>
+        <view wx:if="{{ switcher.checked && user.pending.status === -1 }}" slot="label">{{ user.pending.comment }}</view>
       </van-cell>
     </van-cell-group>
-  </view>
+  </block>
   <form bindsubmit="onSubmitProfile" bindreset="onResetProfile">
     <van-cell-group>
-      <van-field
-        id="building"
-        name="building"
-        value="{{ buildingInput.current.name }}"
-        label="楼栋号"
-        disabled="{{ !editable }}"
-        clickable="{{ editable }}"
-        required
-        readonly
-        placeholder="请选择所在楼栋号"
-        left-icon="location-o"
-        right-icon="info-o"
-        error="{{ buildingInput.error }}"
-        bind:click-input="{{ editable ? 'onClickBuildingInput' : '' }}" />
-      <van-field
-        name="room"
-        value="{{ roomInput.current.room }}"
-        label="室号"
-        disabled="{{ !editable }}"
-        clickable="{{ editable }}"
-        required
-        readonly
-        error="{{ roomInput.error }}"
-        placeholder="请选择所在室号"
-        left-icon="wap-home-o"
-        right-icon="info-o"
-        bind:click-input="{{ editable ? 'onClickRoomInput' : '' }}"/>
-    </van-cell-group>
-    <van-cell-group>
-      <van-field
-        id="nickName"
-        name="nickName"
-        value="{{ wxProfileInput.nickName }}"
-        label="微信昵称"
-        disabled="{{ !editable }}"
-        required
-        readonly
-        use-button-slot
-        placeholder="请点击授权"
-        left-icon="wechat"
-        error="{{ wxProfileInput.error }}">
-        <van-button
-          slot="button"
-          size="small"
-          type="info"
-          plain
-          disabled="{{ !editable }}"
-          bindtap="{{ editable ? 'onClickGetUserProfile' : '' }}">
-            授权读取
+      <van-field id="nickName" name="nickName" value="{{ wxProfileInput.nickName }}" label="微信昵称" disabled="{{ !editable }}" required center readonly use-button-slot size="large" placeholder="请点击授权" left-icon="wechat" error="{{ wxProfileInput.error }}">
+        <van-button slot="button" size="small" type="info" plain disabled="{{ !editable }}" bindtap="{{ editable ? 'onClickGetUserProfile' : '' }}">
+          授权读取
         </van-button>
       </van-field>
     </van-cell-group>
-
     <van-cell-group>
-      <van-field
-        wx:if="{{ nameInput.show }}"
-        name="userName"
-        value="{{ nameInput.current }}"
-        label="姓名"
-        placeholder="请输入姓名"
-        disabled="{{ !editable }}"
-        required
-        error="{{ nameInput.error }}"
-        left-icon="contact"
-        right-icon="info-o"/>
-      <van-field
-        wx:if="{{ contactInput.show }}"
-        name="contactNumber"
-        value="{{ contactInput.current }}"
-        label="手机号"
-        placeholder="请输入手机号"
-        disabled="{{ !editable }}"
-        required
-        error="{{ contactInput.error }}"
-        left-icon="phone-o"
-        right-icon="info-o"
-      />
+      <van-field id="building" name="building" value="{{ buildingInput.current.name }}" label="楼栋号" disabled="{{ !editable }}" clickable="{{ editable }}" required center readonly size="large" placeholder="请选择所在楼栋号" left-icon="location-o" right-icon="info-o" error="{{ buildingInput.error }}" bind:click-input="{{ editable ? 'onClickBuildingInput' : '' }}" />
+      <van-field name="room" value="{{ roomInput.current.room }}" label="室号" disabled="{{ !editable }}" clickable="{{ editable }}" required center readonly error="{{ roomInput.error }}" size="large" placeholder="请选择所在室号" left-icon="wap-home-o" right-icon="info-o" bind:click-input="{{ editable ? 'onClickRoomInput' : '' }}" />
+    </van-cell-group>
+    <van-cell-group>
+      <van-field wx:if="{{ nameInput.show }}" name="userName" value="{{ nameInput.current }}" label="姓名" size="large" placeholder="请输入姓名" disabled="{{ !editable }}" required center error="{{ nameInput.error }}" left-icon="contact" right-icon="info-o" />
+      <van-field wx:if="{{ contactInput.show }}" name="contactNumber" value="{{ contactInput.current }}" label="手机号" size="large" placeholder="请输入手机号" disabled="{{ !editable }}" required center error="{{ contactInput.error }}" left-icon="phone-o" right-icon="info-o" />
     </van-cell-group>
     <view wx:if="{{ !editable }}">
       <van-button custom-class="form-button" round block type="info" icon="edit" form-type="reset">
@@ -96,7 +40,7 @@
       </van-button>
     </view>
     <view wx:if="{{ editable }}">
-      <view wx:if="{{ userStatus > 0 }}">
+      <view wx:if="{{ user.status > 0 }}">
         <van-button custom-class="form-button" plain round block type="danger" icon="revoke" bind:click="init">
           撤销修改
         </van-button>
@@ -108,30 +52,11 @@
   </form>
 </view>
 <!-- popup part -->
-<van-popup
-  show="{{ buildingInput.showPicker || roomInput.showPicker }}"
-  bind:close="onClosePopup"
-  position="bottom"
-  z-index="99999"
-  safe-area-inset-top="{{true}}">
+<van-popup show="{{ buildingInput.showPicker || roomInput.showPicker }}" bind:close="onClosePopup" position="bottom" z-index="99999" safe-area-inset-top="{{true}}">
   <view wx:if="{{ buildingInput.showPicker }}">
-    <van-picker
-      columns="{{ buildingInput.values }}"
-      show-toolbar
-      loading="{{ buildingInput.loading}}"
-      title="选择楼号"
-      value-key="name"
-      bind:cancel="onClosePopup"
-      bind:confirm="onBuildingPickerConfirm"/>
+    <van-picker columns="{{ buildingInput.values }}" show-toolbar loading="{{ buildingInput.loading}}" title="选择楼号" value-key="name" bind:cancel="onClosePopup" bind:confirm="onBuildingPickerConfirm" />
   </view>
   <view wx:if="{{ roomInput.showPicker }}">
-    <van-picker
-      columns="{{ roomInput.values }}"
-      show-toolbar
-      loading="{{ roomInput.loading }}"
-      title="选择室号"
-      value-key="room"
-      bind:cancel="onClosePopup"
-      bind:confirm="onRoomPickerConfirm"/>
+    <van-picker columns="{{ roomInput.values }}" show-toolbar loading="{{ roomInput.loading }}" title="选择室号" value-key="room" bind:cancel="onClosePopup" bind:confirm="onRoomPickerConfirm" />
   </view>
 </van-popup>

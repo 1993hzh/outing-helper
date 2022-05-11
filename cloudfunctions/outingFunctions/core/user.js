@@ -23,22 +23,26 @@ class User {
     admin: undefined,
     superAdmin: undefined
   };
-  managed_buildings = {};
+  managed_buildings = undefined;
   // for approval
-  pending_data = {
-    _id: undefined,
-    wx_nick_name: undefined,
-    wx_avatar_url: undefined,
-    name: undefined,
-    contact_number: undefined,
-    residence: {
+  pending = {
+    status: undefined,// -1: rejected; 0: initial; 1: approved
+    comment: undefined,
+    data: {
       _id: undefined,
-      building: undefined,
-      room: undefined
-    },
-    certificate: {
-      _id: undefined
-    },
+      wx_nick_name: undefined,
+      wx_avatar_url: undefined,
+      name: undefined,
+      contact_number: undefined,
+      residence: {
+        _id: undefined,
+        building: undefined,
+        room: undefined
+      },
+      certificate: {
+        _id: undefined
+      },
+    }
   };
   status = 0;// -1: deleted, 0: initial, 1: valid, 10: hasPendingRecord
   revision = 0;

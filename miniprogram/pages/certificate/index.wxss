@@ -4,17 +4,13 @@
   justify-content: center;
   align-items: center;
   width: 750rpx;
-  height: 1200rpx;
+  height: 1000rpx;
 }
 
-.no-qrcode {
-  font-size: 100rpx;
+.certificate-info {
+  font-size: 36rpx;
   font-weight: bold;
-  color: #ed3f14;
-}
-
-.invalid-qrcode {
-  font-size: 100rpx;
-  font-weight: bold;
+  /* color: #ed3f14; */
   color: #ff9900;
+  margin-bottom: 50rpx;
 }

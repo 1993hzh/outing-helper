@@ -2,7 +2,9 @@
 <van-toast id="van-toast" />
 
 <view class="qrcode-container">
-  {{currentUser.residence.building.name}}{{currentUser.residence.room}}
+  <view class="certificate-info">
+    {{currentUser.residence.building.name}}{{currentUser.residence.room}}
+  </view>
   <view wx:if="{{!certificate.qrcode_url}}" class="no-qrcode">
     <van-empty class="custom-image" image="https://img.yzcdn.cn/vant/custom-empty-image.png" description="无出入证">
       <van-button round plain type="info" class="bottom-button" bind:click="onClickRegisterUser">去完善信息</van-button>

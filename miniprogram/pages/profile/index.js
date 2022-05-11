@@ -9,12 +9,19 @@ const PHONE_REGEX = /^1[3-9]\d{9}$/;
 Page({
 
   data: {
+    user: {
+      status: 0,
+      pending: {
+        status: 0,
+        comment: '',
+        data: {},
+      }
+    },
     switcher: {
       show: false,
       checked: false,
     },
     editable: true,
-    userStatus: 0,
     buildingInput: {
       error: false,
       current: {},
@@ -65,12 +72,6 @@ Page({
     this.getTabBar().onPageShow();
   },
 
-  onShareAppMessage() {
-    return {
-      title: '出入信息'
-    }
-  },
-
   onPullDownRefresh() {
     app.userLogin()
       .then((result) => {
@@ -98,33 +99,35 @@ Page({
         checked: false,
       },
       editable: false,
-      userStatus: user?.status,
-      'buildingInput.current': user?.residence?.building,
-      'roomInput.current': user?.residence,
-      'nameInput.current': user?.name,
+      user: {
+        status: user?.status,
+        pending: user?.pending,
+      },
+      'buildingInput.current': user?.residence?.building || {},
+      'roomInput.current': user?.residence || {},
+      'nameInput.current': user?.name || {},
       'nameInput.show': true,
-      'contactInput.current': user?.contact_number,
+      'contactInput.current': user?.contact_number || '',
       'contactInput.show': true,
-      'wxProfileInput.nickName': user?.wx_nick_name,
-      'wxProfileInput.avatarUrl': user?.wx_avatar_url,
+      'wxProfileInput.nickName': user?.wx_nick_name || '',
+      'wxProfileInput.avatarUrl': user?.wx_avatar_url || '',
     });
   },
 
   onClickSwitch({ detail }) {
     const user = app.globalData.loginUser;
-    const data = detail ? user?.pending_data : user;
+    const data = detail ? user?.pending.data : user;
     this.setData({
       'switcher.checked': detail,
       editable: false,
-      userStatus: user?.status,
-      'buildingInput.current': data?.residence?.building,
-      'roomInput.current': data?.residence,
-      'nameInput.current': data?.name,
+      'buildingInput.current': data?.residence?.building || {},
+      'roomInput.current': data?.residence || {},
+      'nameInput.current': data?.name || '',
       'nameInput.show': true,
-      'contactInput.current': data?.contact_number,
+      'contactInput.current': data?.contact_number || '',
       'contactInput.show': true,
-      'wxProfileInput.nickName': data?.wx_nick_name,
-      'wxProfileInput.avatarUrl': data?.wx_avatar_url,
+      'wxProfileInput.nickName': data?.wx_nick_name || '',
+      'wxProfileInput.avatarUrl': data?.wx_avatar_url || '',
     });
   },
 

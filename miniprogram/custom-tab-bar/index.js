@@ -65,11 +65,11 @@ Component({
     ready() {
       if (app.globalData.hasUser) {
         this.adjustBarByUser();
-      } else {
-        app.watchUserLogin((user) => {
-          this.adjustBarByUser();
-        });
       }
+      
+      app.watchUserLogin((user) => {
+        this.adjustBarByUser();
+      });
     },
   },
 
