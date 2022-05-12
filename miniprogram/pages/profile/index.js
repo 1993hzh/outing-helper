@@ -2,6 +2,7 @@
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
 import BizError from '../../utils/bizError';
+import functionTemplate from '../../utils/functionTemplate';
 
 const app = getApp();
 const PHONE_REGEX = /^1[3-9]\d{9}$/;
@@ -144,30 +145,23 @@ Page({
       'buildingInput.showPicker': true,
       'buildingInput.loading': true,
     });
-    wx.cloud.callFunction({
-      name: 'outingFunctions',
-      data: {
+
+    functionTemplate.send({
+      message: '正在加载...',
+      errorMessage: '加载失败，请联系管理员',
+      request: {
         service: 'buildingService',
         method: 'list'
-      }
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      this.setData({
-        'buildingInput.loading': false,
-        'buildingInput.values': result.data,
-      });
-    }).catch((err) => {
-      this.setData({ 'buildingInput.loading': false });
-      if (err instanceof BizError) {
-        Toast.fail({ message: err.message, zIndex: 999999, });
-      } else {
-        Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
-      }
-      logger.error('Load buildings failed.', err)
+      },
+      action: (result) => {
+        this.setData({
+          'buildingInput.loading': false,
+          'buildingInput.values': result.data,
+        });
+      },
+      errorHandler: (error) => {
+        this.setData({ 'buildingInput.loading': false });
+      },
     });
   },
 
@@ -184,31 +178,24 @@ Page({
       'roomInput.showPicker': true,
       'roomInput.loading': true,
     });
-    wx.cloud.callFunction({
-      name: 'outingFunctions',
-      data: {
+
+    functionTemplate.send({
+      message: '正在加载...',
+      errorMessage: '加载失败，请联系管理员',
+      request: {
         service: 'residenceService',
         method: 'listByBuilding',
         args: currentBuilding
-      }
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      this.setData({
-        'roomInput.loading': false,
-        'roomInput.values': result.data,
-      });
-    }).catch((err) => {
-      this.setData({ 'roomInput.loading': false });
-      if (err instanceof BizError) {
-        Toast.fail({ message: err.message, zIndex: 999999, });
-      } else {
-        Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
-      }
-      logger.error('Load residences failed.', err)
+      },
+      action: (result) => {
+        this.setData({
+          'roomInput.loading': false,
+          'roomInput.values': result.data,
+        });
+      },
+      errorHandler: (error) => {
+        this.setData({ 'roomInput.loading': false });
+      },
     });
   },
 
@@ -286,9 +273,10 @@ Page({
     const residence = this.data.roomInput.current;
     const wxProfile = this.data.wxProfileInput;
     const user = app.globalData.loginUser;
-    wx.cloud.callFunction({
-      name: 'outingFunctions',
-      data: {
+    functionTemplate.send({
+      message: '正在提交...',
+      errorMessage: '操作失败，请联系管理员',
+      request: {
         service: 'userService',
         method: 'updateProfile',
         args: {
@@ -299,22 +287,10 @@ Page({
           contact_number: formValues.contactNumber,
           residence: residence,
         },
-      }
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      app.globalData.loginUser = result.data;//TODO
-      logger.info(`updateProfile returned: ${JSON.stringify(resp)}`);
-    }).catch((err) => {
-      if (err instanceof BizError) {
-        Toast.fail({ message: err.message, });
-      } else {
-        Toast.fail('更新出错，请联系管理员');
-      }
-      logger.error(`updateProfile for user: ${JSON.stringify(user)} failed.`, err);
+      },
+      action: (result) => {
+        app.globalData.loginUser = result.data;
+      },
     });
   },
 })

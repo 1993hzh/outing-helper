@@ -3,14 +3,14 @@ import Toast from '@vant/weapp/toast/toast';
 import BizError from './bizError';
 
 module.exports = {
-  send({ message = '正在发送请求...', errorMessage = '服务出错，请联系管理员', request, action }) {
+  send({ message = '正在发送请求...', errorMessage = '服务出错，请联系管理员', request, action, errorHandler }) {
     if (!action || !request) {
       logger.error(`CallFunction found invalid request, request: ${JSON.stringify(request)}, action: ${action}`);
       return;
     }
 
     Toast.loading({ message: message, forbidClick: true, zIndex: 999999, });
-    wx.cloud.callFunction({
+    return wx.cloud.callFunction({
       name: 'outingFunctions',
       data: request
     }).then((resp) => {
@@ -25,11 +25,16 @@ module.exports = {
       action(result);
       Toast.clear();
     }).catch((err) => {
+      if (errorHandler) {
+        errorHandler(err);
+      }
+
       if (err instanceof BizError) {
         Toast.fail({ message: err.message, forbidClick: true, zIndex: 999999, });
       } else {
         Toast.fail({ message: errorMessage, forbidClick: true, zIndex: 999999, });
       }
+      
       logger.error(`CallFunction with request: ${JSON.stringify(request)} failed.`, err);
     });
   },

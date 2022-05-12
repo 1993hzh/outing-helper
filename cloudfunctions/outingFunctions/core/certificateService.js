@@ -57,6 +57,12 @@ class CertificateService extends BaseService {
     });
   }
 
+  async findCertificateWithCheckRecords(certId) {
+    const certificate = await this.findById(certId);
+    const checkRecords = await this.checkRecordService.findByCertificate(certId);
+    return { certificate, checkRecords };
+  }
+
   async certify(residence) {
     if (!residence || !residence._id) {
       throw new Error(`Invalid residence to certify: ${JSON.stringify(residence)}.`);

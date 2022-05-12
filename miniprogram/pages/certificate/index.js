@@ -2,6 +2,7 @@
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
 import BizError from '../../utils/bizError';
+import functionTemplate from '../../utils/functionTemplate';
 
 const app = getApp();
 
@@ -53,36 +54,23 @@ Page({
       return;
     }
 
-    Toast.loading({ message: '加载出入证...', forbidClick: true, });
-
-    wx.cloud.callFunction({
-      name: 'outingFunctions',
-      data: {
+    functionTemplate.send({
+      message: '加载出入证...',
+      errorMessage: '加载失败',
+      request: {
         service: 'certificateService',
         method: 'findById',
         args: certificate._id
-      }
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      const cert = result.data;
-      loginUser.certificate.outing_count = cert.outing_count;
-      this.setData({
-        currentUser: loginUser,
-        certificate: cert
-      });
-      wx.stopPullDownRefresh();
-      Toast.clear();
-    }).catch((err) => {
-      if (err instanceof BizError) {
-        Toast.fail({ message: err.message, forbidClick: true, });
-      } else {
-        Toast.fail({ message: '加载失败', forbidClick: true, });
-      }
-      logger.error(`Load certificate: ${certificate._id} failed.`, err);
+      },
+      action: (result) => {
+        const cert = result.data;
+        loginUser.certificate.outing_count = cert.outing_count;
+        this.setData({
+          currentUser: loginUser,
+          certificate: cert
+        });
+        wx.stopPullDownRefresh();
+      },
     });
   },
 

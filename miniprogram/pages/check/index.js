@@ -2,6 +2,7 @@
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
 import BizError from '../../utils/bizError';
+import functionTemplate from '../../utils/functionTemplate';
 
 const app = getApp();
 const queryString = require('query-string');
@@ -77,72 +78,44 @@ Page({
   },
 
   onClickCheckIn(event) {
-    Toast.loading({ message: '检入中，请稍后...', forbidClick: true, zIndex: 999999, });
-
-    wx.cloud.callFunction({
-      name: 'outingFunctions',
-      data: {
+    functionTemplate.send({
+      message: '检入中，请稍后...',
+      errorMessage: '检入发生错误，请联系管理员',
+      request: {
         service: 'certificateService',
         method: 'checkIn',
         args: this.data.certificate
-      }
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      const data = result.data;
-      const processedCheckRecord = this.processCheckRecord(data.checkRecord);
-      this.data.checkRecords.push(processedCheckRecord);
-      this.setData({
-        certificate: data.certificate,
-        checkRecords: this.data.checkRecords
-      });
-
-      Toast.clear();
-    }).catch((err) => {
-      if (err instanceof BizError) {
-        Toast.fail({ message: err.message, zIndex: 999999, });
-      } else {
-        Toast.fail({ message: '检入发生错误，请联系管理员', zIndex: 999999, });
-      }
-      logger.error(`checkIn: ${this.data.certificate._id} failed.`, err);
+      },
+      action: (result) => {
+        const data = result.data;
+        const processedCheckRecord = this.processCheckRecord(data.checkRecord);
+        this.data.checkRecords.push(processedCheckRecord);
+        this.setData({
+          certificate: data.certificate,
+          checkRecords: this.data.checkRecords
+        });
+      },
     });
   },
 
   onClickCheckOut(event) {
-    Toast.loading({ message: '检出中，请稍后...', forbidClick: true, zIndex: 999999, });
-
-    wx.cloud.callFunction({
-      name: 'outingFunctions',
-      data: {
+    functionTemplate.send({
+      message: '检出中，请稍后...',
+      errorMessage: '检出发生错误，请联系管理员',
+      request: {
         service: 'certificateService',
         method: 'checkOut',
         args: this.data.certificate
-      }
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      const data = result.data;
-      const processedCheckRecord = this.processCheckRecord(data.checkRecord);
-      this.data.checkRecords.push(processedCheckRecord);
-      this.setData({
-        certificate: data.certificate,
-        checkRecords: this.data.checkRecords
-      });
-
-      Toast.clear();
-    }).catch((err) => {
-      if (err instanceof BizError) {
-        Toast.fail({ message: err.message, zIndex: 999999, });
-      } else {
-        Toast.fail({ message: '检出发生错误，请联系管理员', zIndex: 999999, });
-      }
-      logger.error(`checkOut: ${this.data.certificate._id} failed.}`, err);
+      },
+      action: (result) => {
+        const data = result.data;
+        const processedCheckRecord = this.processCheckRecord(data.checkRecord);
+        this.data.checkRecords.push(processedCheckRecord);
+        this.setData({
+          certificate: data.certificate,
+          checkRecords: this.data.checkRecords
+        });
+      },
     });
   },
 
@@ -157,59 +130,25 @@ Page({
   loadData(certId) {
     if (!certId) {
       Toast.fail({ message: '二维码不正确。', zIndex: 999999, });
-    } else {
-      Toast.loading({ message: '正在加载...', forbidClick: true, zIndex: 999999, });
     }
 
-    wx.cloud.callFunction({
-      name: 'outingFunctions',
-      data: {
+    functionTemplate.send({
+      message: '正在加载...',
+      errorMessage: '加载失败，请联系管理员',
+      request: {
         service: 'certificateService',
-        method: 'findById',
+        method: 'findCertificateWithCheckRecords',
         args: certId
-      }
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      let data = result.data;
-      logger.info(`Find certificate by id: ${certId} returned: ${JSON.stringify(data)}`);
-      this.setData({
-        certificate: data
-      });
-    }).then((resp) => {
-      return wx.cloud.callFunction({
-        name: 'outingFunctions',
-        data: {
-          service: 'checkRecordService',
-          method: 'findByCertificate',
-          args: certId
-        }
-      });
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      const data = result.data;
-      const displayData = data.map(e => this.processCheckRecord(e));
-      logger.info(`Find checkRecord by certId: ${certId} returned: ${JSON.stringify(data)}`);
-      this.setData({
-        checkRecords: displayData,
-        showCheckPopup: true
-      });
-
-      Toast.clear();
-    }).catch((err) => {
-      if (err instanceof BizError) {
-        Toast.fail({ message: err.message, zIndex: 999999, });
-      } else {
-        Toast.fail({ message: '加载失败，请联系管理员', zIndex: 999999, });
-      }
-      logger.error(`Check cert by id: ${certId} failed.`, err);
+      },
+      action: async (result) => {
+        const { certificate, checkRecords } = result.data;
+        const displayData = checkRecords.map(e => this.processCheckRecord(e));
+        this.setData({
+          certificate: certificate,
+          checkRecords: displayData,
+          showCheckPopup: true
+        });
+      },
     });
   },
 

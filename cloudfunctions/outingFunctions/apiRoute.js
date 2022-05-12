@@ -63,6 +63,11 @@ class ApiRoute {
         return await safeRunner.run({
           invocation: () => certificateService.findByResidence(args),
         });
+      case 'findCertificateWithCheckRecords':
+        return await safeRunner.run({
+          invocation: () => certificateService.findCertificateWithCheckRecords(args),
+          roles: ['checker', 'superAdmin'],
+        });
       case 'createQRcode':
         return await safeRunner.run({
           invocation: () => certificateService.createQRcode(args),

@@ -2,6 +2,7 @@
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
 import BizError from '../../utils/bizError';
+import functionTemplate from '../../utils/functionTemplate';
 
 const app = getApp();
 
@@ -45,35 +46,21 @@ Page({
       return;
     }
 
-    Toast.loading({ message: '加载中...', forbidClick: true, });
-    wx.cloud.callFunction({
-      name: 'outingFunctions',
-      data: {
+    functionTemplate.send({
+      message: '正在加载...',
+      errorMessage: '加载失败，请联系管理员',
+      request: {
         service: 'checkRecordService',
         method: 'findByCertificate',
         args: certId
-      }
-    }).then((resp) => {
-      const result = resp.result;
-      if (!result.success) {
-        throw new BizError(result.errorMessage);
-      }
-
-      let data = result.data;
-      logger.info(`Find checkRecord by certId: ${certId} returned: ${JSON.stringify(data)}`);
-      this.setData({
-        checkRecords: this.processCheckRecord(data),
-        isRefreshing: false
-      });
-
-      Toast.clear();
-    }).catch((err) => {
-      if (err instanceof BizError) {
-        Toast.fail({ message: err.message, });
-      } else {
-        Toast.fail('加载出错，请联系管理员');
-      }
-      logger.error(`check load by id: ${certId} failed.`, err);
+      },
+      action: async (result) => {
+        const checkRecords = result.data;
+        this.setData({
+          checkRecords: this.processCheckRecord(checkRecords),
+          isRefreshing: false
+        });
+      },
     });
   },
 
