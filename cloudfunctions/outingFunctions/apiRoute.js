@@ -161,6 +161,28 @@ class ApiRoute {
           invocation: () => userService.updateProfile(args),
           transactional: true,
         });
+      case 'approveUserProfile':
+        return await safeRunner.run({
+          invocation: () => userService.approveUserProfile(args),
+          roles: ['admin', 'superAdmin'],
+          transactional: true,
+        });
+      case 'rejectUserProfile':
+        return await safeRunner.run({
+          invocation: () => userService.rejectUserProfile(args),
+          roles: ['admin', 'superAdmin'],
+          transactional: true,
+        });
+      case 'listPendingUsers':
+        return await safeRunner.run({
+          invocation: () => userService.listPendingUsers(args),
+          roles: ['admin', 'superAdmin'],
+        });
+      case 'findUsersByCriteria':
+        return await safeRunner.run({
+          invocation: () => userService.findUsersByCriteria(args),
+          roles: ['superAdmin'],
+        });
       default:
         throw new Error(`Found invalid funtion call: ${service}.${method}`);
     }

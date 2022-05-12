@@ -15,16 +15,16 @@ Page({
   },
 
   onLoad(options) {
-    if (!app.globalData.hasUser) {// user not login
-      Toast.loading({ message: '正在加载', forbidClick: true, });
-    } else {
-      this.onScanQRcode(options);
-    }
-    
     app.watchUserLogin((user) => {
       Toast.clear();
       this.onScanQRcode(options);
     });
+    
+    if (!app.globalData.hasUser) {// user not login
+      Toast.loading({ message: '正在登录', forbidClick: true, });
+    } else {
+      this.onScanQRcode(options);
+    }
   },
 
   onReady() { },

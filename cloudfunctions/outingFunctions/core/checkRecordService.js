@@ -1,16 +1,13 @@
 const BizError = require('../bizError')
-const BaseService = require('./baseService')
+const { BaseService, cloud } = require('./baseService')
 const CheckRecord = require('./checkRecord')
 
 const moment = require('moment')
 moment.locale('zh-CN');
 
-const cloud = require('wx-server-sdk');
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
-});
 const db = cloud.database();
 const _ = db.command;
+
 const COLLECTION_CHECK_RECORD = 'check_record';
 
 class CheckRecordService extends BaseService {

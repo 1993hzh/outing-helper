@@ -1,48 +1,167 @@
 <!--pages/admin/index.wxml-->
-<van-toast id="van-toast"/>
-<view>
-  <form bindsubmit="onSubmitResidences" bindreset="">
-    <van-cell-group>
-      <van-field
-        id="building"
-        name="building"
-        value="{{ buildingInput.currentBuilding.name }}"
-        label="楼栋号"
-        clickable
-        required
-        readonly
-        placeholder="请选择楼栋号"
-        left-icon="location-o"
-        right-icon="info-o"
-        bind:click-input="onClickBuildingInput"
-      />
-      <van-field
-        name="roomList"
-        type="textarea"
-        label="室号"
-        placeholder="请输入室号"
-        required
-        autosize
-        left-icon="wap-home-o"
-        right-icon="info-o"
-      />
+<van-toast id="van-toast" />
+
+<van-tabs type="line" sticky animated active="{{ activeTab }}" bind:change="onClickChangeTab">
+  <!-- 居民信息审核 -->
+  <van-tab title="居民审核" name="profile">
+    <van-dropdown-menu z-index="100000">
+      <van-dropdown-item
+        bind:change="onBuildingChange"
+        value="{{ profileDropDown.buildingOptionValue }}"
+        options="{{ profileDropDown.buildingOptions }}" />
+      <van-dropdown-item
+        bind:change="onStatusChange"
+        value="{{ profileDropDown.statusOptionValue }}"
+        options="{{ profileDropDown.statusOptions }}" />
+    </van-dropdown-menu>
+    <block wx:if="{{pendingUsers.length <= 0}}">
+      <van-empty description="暂无需要审核的居民" />
+    </block>
+    <van-cell-group wx:for="{{ pendingUsers }}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
+      <van-cell
+        center
+        size="large"
+        clickable bind:click="onClickUserCell" data-user="{{ item }}" data-tab="profile"
+        use-label-slot>
+        {{ item.pending.data.residence.room }}
+        <view slot="title" class="profile-wx-container">
+          <image class="profile-wx-avatar" src="{{ item.pending.data.wx_avatar_url }}" mode="heightFix"	lazy-load="true" />
+          <text>{{ item.pending.data.wx_nick_name }}</text>
+        </view>
+        <view slot="label">
+          {{ item.pending.comment }}
+        </view>
+      </van-cell>
     </van-cell-group>
-    <van-button custom-class="submit-button" round block type="primary" icon="completed" form-type="submit">生成住处</van-button>
-  </form>
-</view>
-<!-- popup part -->
+  </van-tab>
+  <!-- 楼栋管理 -->
+  <van-tab disabled="{{ true }}" title="楼栋管理" name="residence">
+    <!-- TODO -->
+    <form bindsubmit="onSubmitResidences" bindreset="">
+      <van-cell-group>
+        <van-field id="building" name="building" value="{{ buildingInput.currentBuilding.name }}" label="楼栋号" clickable required readonly placeholder="请选择楼栋号" left-icon="location-o" right-icon="info-o" bind:click-input="onClickBuildingInput" />
+        <van-field name="roomList" type="textarea" label="室号" placeholder="请输入室号" required autosize left-icon="wap-home-o" right-icon="info-o" />
+      </van-cell-group>
+      <van-button custom-class="submit-button" round block type="primary" icon="completed" form-type="submit">生成住处</van-button>
+    </form>
+  </van-tab>
+  <!-- 小区管理 -->
+  <van-tab hidden="{{ !userRole.superAdmin }}" disabled="{{ true }}" title="小区管理" name="community">
+    <!-- TODO -->
+  </van-tab>
+  <!-- 权限管理 -->
+  <van-tab hidden="{{ !userRole.superAdmin }}" title="权限管理" name="permission">
+    <van-dropdown-menu z-index="100000">
+      <van-dropdown-item
+        bind:change="onPermBuildingChange"
+        value="{{ permissionDropDown.buildingOptionValue }}"
+        options="{{ permissionDropDown.buildingOptions }}" />
+      <van-dropdown-item
+        bind:change="onPermRoleChange"
+        value="{{ permissionDropDown.roleOptionValue }}"
+        options="{{ permissionDropDown.roleOptions }}" />
+    </van-dropdown-menu>
+    <van-search
+      value="{{ userSearchValue }}"
+      placeholder="请输入姓名"
+      show-action
+      shape="round"
+      input-align="center"
+      bind:search="onUserSearch"
+      bind:cancel="onUserSearchCancel">
+    </van-search>
+    <block wx:if="{{permUsers.length <= 0}}">
+      <van-empty description="暂无数据" />
+    </block>
+    <van-cell-group wx:for="{{ permUsers }}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
+      <van-cell
+        center
+        size="large"
+        clickable bind:click="onClickUserCell" data-user="{{ item }}" data-tab="permission"
+        use-label-slot>
+        {{ item.residence.building.name }}{{ item.residence.room }}
+        <view slot="title" class="profile-wx-container">
+          <image class="profile-wx-avatar" src="{{ item.wx_avatar_url }}" mode="heightFix" lazy-load="true" />
+          <text>{{ item.wx_nick_name }}</text>
+          <van-tag class="profile-tag" wx:if="{{ item.role.superAdmin }}" type="danger">超级管理员</van-tag>
+          <van-tag class="profile-tag" wx:if="{{ item.role.admin }}" type="warning">信息员</van-tag>
+          <van-tag class="profile-tag" wx:if="{{ item.role.checker }}" type="primary">门卫</van-tag>
+        </view>
+        <view slot="label">
+          {{ item.name }} | {{ item.contact_number }}
+        </view>
+      </van-cell>
+    </van-cell-group>
+  </van-tab>
+</van-tabs>
+<!-- building popup part -->
 <van-popup
   show="{{ showBuildingPopup }}"
-  bind:close="onClosePopup"
+  bind:close="onCloseBuildingPopup"
   position="bottom"
   z-index="99999"
   safe-area-inset-top="{{true}}">
-  <van-picker
-    columns="{{ buildingInput.buildings }}"
-    show-toolbar
-    loading="{{ buildingInput.loadBuildings}}"
-    title="选择楼号"
-    value-key="name"
-    bind:cancel="onClosePopup"
-    bind:confirm="onBuildingPickerConfirm"/>
+    <van-picker
+      columns="{{ buildingInput.buildings }}"
+      show-toolbar
+      loading="{{ buildingInput.loadBuildings}}"
+      title="选择楼号"
+      value-key="name"
+      bind:cancel="onCloseBuildingPopup"
+      bind:confirm="onBuildingPickerConfirm" />
 </van-popup>
+<!-- user profile popup -->
+<van-popup
+  show="{{ showProfilePopup }}"
+  bind:close="onCloseProfilePopup"
+  position="bottom"
+  z-index="99999"
+  safe-area-inset-top>
+  <van-grid direction="horizontal" column-num="2" use-slot>
+    <van-grid-item>
+      <view slot="text" class="profile-grid-title-before">修改前</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text" class="profile-grid-title-after">修改后</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text">{{ selectedUser.residence.building.name }}</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text">{{ selectedUser.pending.data.residence.building.name }}</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text">{{ selectedUser.residence.room }}</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text">{{ selectedUser.pending.data.residence.room }}</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text">{{ selectedUser.name }}</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text">{{ selectedUser.pending.data.name }}</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text">{{ selectedUser.contact_number }}</view>
+    </van-grid-item>
+    <van-grid-item>
+      <view slot="text">{{ selectedUser.pending.data.contact_number }}</view>
+    </van-grid-item>
+  </van-grid>
+  <!-- check part -->
+  <view class="profile-button-container">
+    <van-button custom-class="profile-button" round type="danger" icon="cross" bind:click="onReject">驳回</van-button>
+    <van-button custom-class="profile-button" round type="primary" icon="success" bind:click="onApprove">通过</van-button>
+  </view>
+</van-popup>
+<!-- grant permission action sheet -->
+<van-action-sheet
+  show="{{ showPermissionActionSheet }}"
+  actions="{{ permissionActions }}"
+  title="授权"
+  cancel-text="取消"
+  z-index="100000"
+  bind:select="onSelectPermissionAction"
+  bind:cancel="onClosePermissionActionSheet"
+/>

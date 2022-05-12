@@ -54,16 +54,16 @@ Page({
   },
 
   onLoad(options) {
+    app.watchUserLogin((user) => {
+      Toast.clear();
+      this.init({ user: user });
+    });
+    
     if (!app.globalData.hasUser) {// user not login
       Toast.loading({ message: '正在登录', forbidClick: true, });
     } else {
       this.init({ user: app.globalData.loginUser });
     }
-
-    app.watchUserLogin((user) => {
-      Toast.clear();
-      this.init({ user: user });
-    });
   },
 
   onReady() { },
@@ -105,7 +105,7 @@ Page({
       },
       'buildingInput.current': user?.residence?.building || {},
       'roomInput.current': user?.residence || {},
-      'nameInput.current': user?.name || {},
+      'nameInput.current': user?.name || '',
       'nameInput.show': true,
       'contactInput.current': user?.contact_number || '',
       'contactInput.show': true,
@@ -260,7 +260,7 @@ Page({
     })
   },
 
-  onResetProfile(event) {
+  onModifyProfile(event) {
     this.setData({ editable: true });
   },
 
@@ -292,6 +292,7 @@ Page({
         service: 'userService',
         method: 'updateProfile',
         args: {
+          _id: user._id,
           wx_nick_name: wxProfile.nickName,
           wx_avatar_url: wxProfile.avatarUrl,
           name: formValues.userName,

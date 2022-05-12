@@ -1,1 +1,47 @@
 /* pages/admin/index.wxss */
+.profile-button {
+  width: 240rpx;
+  height: 100rpx;
+  margin: 50rpx;
+  font-size: 32rpx;
+}
+
+.profile-button-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.profile-grid-title-before {
+  color: #ed3f14 !important;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.profile-grid-title-after {
+  color: #19be6b !important;
+  font-size: 28rpx;
+  font-weight: bold;
+}
+
+.profile-wx-container{
+  display:flex;
+  flex-direction: row;
+  max-height: var(--cell-line-height,24px);
+  width: 150%;
+}
+
+.profile-wx-avatar {
+  display:flex;
+  flex-direction: row;
+  max-height: var(--cell-line-height,24px);
+  margin-right: 16rpx;
+  width: 32rpx;
+}
+
+.profile-tag {
+  margin-left: 10rpx;
+  display:flex;
+  flex-direction: row;
+}

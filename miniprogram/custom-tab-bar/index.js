@@ -63,13 +63,13 @@ Component({
 
     // invoke only once
     ready() {
-      if (app.globalData.hasUser) {
-        this.adjustBarByUser();
-      }
-      
       app.watchUserLogin((user) => {
         this.adjustBarByUser();
       });
+      
+      if (app.globalData.hasUser) {
+        this.adjustBarByUser();
+      }
     },
   },
 

@@ -1,17 +1,14 @@
 const BizError = require('../bizError')
-const BaseService = require('./baseService')
+const { BaseService, cloud } = require('./baseService')
 const CertificateService = require('./certificateService')
 const User = require('./user')
 
 const moment = require('moment')
 moment.locale('zh-CN');
 
-const cloud = require('wx-server-sdk');
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
-});
-const db = cloud.database();
+const db = cloud.database()
 const _ = db.command;
+
 const COLLECTION_USER = 'user';
 
 class UserService extends BaseService {
@@ -25,6 +22,49 @@ class UserService extends BaseService {
 
   transform(jsonObject) {
     return new User(jsonObject);
+  }
+
+  async findUsersByCriteria(criteria) {
+    if (!criteria || Object.keys(criteria).length === 0) {
+      throw new BizError('不支持无条件查询用户');
+    }
+
+    return await this.findBy({
+      criteria: criteria,
+      orderBy: [
+        { prop: 'created_at', type: 'asc' }
+      ],
+    });
+  }
+
+  async listPendingUsers({ building: building, status: status }) {
+    if (building === undefined || status === undefined) {
+      return;
+    }
+
+    const user = this.context.user;
+    const managedBuildings = user.managed_buildings || [];
+    if (!managedBuildings.find(e => e.id === building)) {
+      throw new BizError('只能查看自己管理的楼栋数据');
+    }
+
+    return await this.findBy({
+      criteria: {
+        pending: {
+          status: status,
+          data: {
+            residence: {
+              building: {
+                id: building
+              }
+            }
+          }
+        }
+      },
+      orderBy: [
+        { prop: 'created_at', type: 'asc' }
+      ],
+    });
   }
 
   async login() {
@@ -70,31 +110,63 @@ class UserService extends BaseService {
     }
 
     const user = this.context.user;
-    const updatedUser = await this.update(user, {
-      wx_nick_name: userProfile.wx_nick_name,
-      wx_avatar_url: userProfile.wx_avatar_url,
-      name: userProfile.name,
-      contact_number: userProfile.contact_number,
-      residence: {
-        _id: userProfile.residence._id,
-        building: userProfile.residence.building,
-        room: userProfile.residence.room
-      },
-      'role.resident': true,
-      status: 1,
-    });
+    if (!user) {
+      throw new Error('User not found when updateProfile.');
+    }
 
-    const certs = await this.certificateService.findByResidence(updatedUser.residence)
+    if (user._id != userProfile._id) {
+      console.error(`User: ${user._id} trying to update profile of: ${userProfile._id}`);
+      throw new BizError('用户只可以更新自己的信息');
+    }
+
+    return await this.update(user, {
+      status: 10,
+      pending: {
+        comment: '',
+        status: 0,
+        data: {
+          wx_nick_name: userProfile.wx_nick_name,
+          wx_avatar_url: userProfile.wx_avatar_url,
+          name: userProfile.name,
+          contact_number: userProfile.contact_number,
+          residence: {
+            _id: userProfile.residence._id,
+            building: userProfile.residence.building,
+            room: userProfile.residence.room
+          },
+        },
+      }
+    });
+  }
+
+  async approveUserProfile(userDto) {
+    const user = new User(userDto);
+    if (!user || !user._id || !user.pending || !user.pending.data) {
+      throw new Error('Invalid user for approval.', JSON.stringify(user));
+    }
+
+    const pendingData = user.pending.data;
+    const pendingResidence = pendingData.residence;
+    const certs = await this.certificateService.findByResidence(pendingResidence)
     let certificate = certs[0];
     if (!certificate) {
-      certificate = await this.certificateService.certify(updatedUser.residence);
-      console.log(`Create a new cert: ${JSON.stringify(certificate)}`);
+      console.error(`Cannot find cert for residence: ${JSON.stringify(pendingResidence)}`);
+      throw new Error(`Cannot find cert for residence: ${pendingResidence._id}`);
     }
+
     certificate.bindTo(user);
-    return await this.update(updatedUser, {
-      certificate: {
-        _id: certificate._id,
-      },
+    const updates = user.applyPendingData({ command: _ });
+    return await this.update(user, updates);
+  }
+
+  async rejectUserProfile({ user: user, reason: reason }) {
+    if (!user || !user.pending || !user.pending.data || user.pending.status !== 0) {
+      throw new Error('Invalid user for approval.', JSON.stringify(user));
+    }
+
+    return await this.update(user, {
+      'pending.status': -1,
+      'pending.comment': reason,
     });
   }
 

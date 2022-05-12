@@ -8,6 +8,7 @@
 </view>
 <van-popup
   show="{{ showCheckPopup }}"
+  onCloseProfilePopup
   bind:close="onClosePopup" 
   custom-style="height: 75%;"
   position="bottom"
@@ -27,6 +28,9 @@
             <van-icon slot="right-icon" name="clock-o"/>
         </van-cell>
     </van-cell-group>
+    <block wx:if="{{checkRecords.length <= 0}}">
+      <van-empty description="暂无出入记录" />
+    </block>
     <!-- check part -->
     <view wx:if="{{certificate}}" class="check-button-container">
         <van-button custom-class="check-button" round type="primary" icon="wap-home" bind:click="onClickCheckIn">进</van-button>

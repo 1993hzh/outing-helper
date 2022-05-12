@@ -1,9 +1,6 @@
 const BizError = require('./bizError');
+const { cloud } = require('./core/baseService')
 const UserService = require('./core/userService')
-const cloud = require('wx-server-sdk');
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
-});
 const db = cloud.database();
 
 class SafeRunner {
@@ -42,18 +39,21 @@ class SafeRunner {
       }
     }
 
-    if (!transactional) {
+    // if (!transactional) {
       return await invocation();
-    }
+    // }
 
-    const transaction = await db.startTransaction();
-    try {
-      const result = await invocation();
-      await transaction.commit();
-      return result;
-    } catch (error) {
-      await transaction.rollback();
-    }
+    // cannot use where for transaction
+    // https://developers.weixin.qq.com/community/develop/doc/0000c49965c2f8f47e9b4d97057000
+    // https://developers.weixin.qq.com/community/develop/doc/000826ef818bf0ce5ebcc5a2c5b000
+    // const transaction = await db.startTransaction();
+    // try {
+    //   const result = await invocation();
+    //   await transaction.commit();
+    //   return result;
+    // } catch (error) {
+    //   await transaction.rollback();
+    // }
   }
 }
 

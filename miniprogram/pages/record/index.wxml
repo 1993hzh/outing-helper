@@ -7,9 +7,9 @@
     enable-back-to-top="true"
     style="height: calc(90vh - env(safe-area-inset-bottom));;">
     <!-- empty part -->
-    <view wx:if="{{checkRecords.length <= 0}}">
+    <block wx:if="{{checkRecords.length <= 0}}">
       <van-empty description="暂无出入记录" />
-    </view>
+    </block>
     <!-- records part -->
     <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
       <van-cell center value="{{item.displayDateTime}}" use-label-slot="{{true}}" size="large">

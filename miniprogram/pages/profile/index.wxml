@@ -18,7 +18,7 @@
       </van-cell>
     </van-cell-group>
   </block>
-  <form bindsubmit="onSubmitProfile" bindreset="onResetProfile">
+  <form bindsubmit="onSubmitProfile" bindreset="onModifyProfile">
     <van-cell-group>
       <van-field id="nickName" name="nickName" value="{{ wxProfileInput.nickName }}" label="微信昵称" disabled="{{ !editable }}" required center readonly use-button-slot size="large" placeholder="请点击授权" left-icon="wechat" error="{{ wxProfileInput.error }}">
         <van-button slot="button" size="small" type="info" plain disabled="{{ !editable }}" bindtap="{{ editable ? 'onClickGetUserProfile' : '' }}">

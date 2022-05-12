@@ -4,11 +4,6 @@ const CheckRecord = require('./checkRecord')
 const moment = require('moment')
 moment.locale('zh-CN');
 
-const cloud = require('wx-server-sdk');
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
-});
-
 class Certificate {
   _id = undefined;
   outing_count = 0;
@@ -30,14 +25,11 @@ class Certificate {
   }
 
   bindTo(user) {
-    console.info(`Binding certificate: ${this._id} to user: ${JSON.stringify(user)}`);
-    if (!user.certificate) {
-      user.certificate = {};
+    if (!this._id) {
+      throw new Error('Invalid certificate to bindTo user.');
     }
-    
-    user.certificate._id = this._id;
-    console.info(`Binding certificate: ${this._id} succeed.`);
-    return user;
+
+    return user.bind(this);
   }
 
   checkOut(user) {
@@ -49,10 +41,8 @@ class Certificate {
 
     this.outing_count++;
 
-    const wxContext = cloud.getWXContext();
     let record = new CheckRecord();
     record.check_type = 0;
-    record.checked_by = wxContext.OPENID;
     record.certificate_id = this._id;
     record.user = {
       _id: user._id,
@@ -71,10 +61,8 @@ class Certificate {
 
     this.outing_count++;
 
-    const wxContext = cloud.getWXContext();
     let record = new CheckRecord();
     record.check_type = 1;
-    record.checked_by = wxContext.OPENID;
     record.certificate_id = this._id;
     record.user = {
       _id: user._id,

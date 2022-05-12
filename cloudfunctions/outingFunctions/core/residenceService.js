@@ -1,24 +1,24 @@
 const BizError = require('../bizError')
-const BaseService = require('./baseService')
+const { BaseService, cloud } = require('./baseService')
 const BuidingService = require('./buildingService')
+const CertificateService = require('./certificateService')
 
 const moment = require('moment')
 moment.locale('zh-CN');
 
-const cloud = require('wx-server-sdk');
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
-});
 const db = cloud.database();
 const _ = db.command;
-const COLLECTION_RESIDENCE = 'residence';
 
+const COLLECTION_RESIDENCE = 'residence';
 const buidingService = new BuidingService();
 
 class ResidenceService extends BaseService {
 
+  certificateService = undefined;
+
   constructor(context) {
     super(COLLECTION_RESIDENCE, context);
+    this.certificateService = new CertificateService(context);
   }
 
   async listByBuilding(building) {
@@ -62,7 +62,9 @@ class ResidenceService extends BaseService {
     }
 
     console.info(`Inserting Residence: ${JSON.stringify(partialResidence)}`);
-    return await super.insert(partialResidence);
+    const newResidence = await super.insert(partialResidence);
+    await this.certificateService.certify(newResidence);
+    return newResidence;
   }
 
   async batchCreate({ building, rooms }) {

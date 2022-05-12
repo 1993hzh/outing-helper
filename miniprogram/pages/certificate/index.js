@@ -13,17 +13,18 @@ Page({
   },
 
   onLoad(options) {
+    app.watchUserLogin((user) => {
+      Toast.clear();
+      this.data.currentUser = user;
+      this.loadCertificate();
+    });
+    
     if (!app.globalData.hasUser) {// user not login
       Toast.loading({ message: '正在登录', forbidClick: true, });
     } else {
       this.data.currentUser = app.globalData.loginUser;
       this.loadCertificate();
     }
-    app.watchUserLogin((user) => {
-      Toast.clear();
-      this.data.currentUser = user;
-      this.loadCertificate();
-    });
   },
 
   onReady() { },

@@ -29,7 +29,6 @@ class User {
     status: undefined,// -1: rejected; 0: initial; 1: approved
     comment: undefined,
     data: {
-      _id: undefined,
       wx_nick_name: undefined,
       wx_avatar_url: undefined,
       name: undefined,
@@ -56,8 +55,34 @@ class User {
   }
 
   bind(certificate) {
-    certificate.bindTo(this);
-    //TODO
+    if (!this._id) {
+      throw new Error(`Invalid user to bind certificate.`);
+    }
+
+    const pendingCert = this.pending.data.certificate;
+    pendingCert._id = certificate._id;
+    console.info(`Binding certificate: ${certificate._id} to user: ${this._id}.`);
+    return this;
+  }
+
+  applyPendingData({ command: command }) {
+    return {
+      ...this.pending.data,
+      ...{
+        role: {
+          resident: true,
+        },
+        status: 1,
+        pending: command.set({// clear pending data
+          data: {
+            residence: {},
+            certificate: {},
+          },
+          comment: '',
+          status: 1,
+        }),
+      }
+    };
   }
 }
 

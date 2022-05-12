@@ -1,18 +1,14 @@
 const BizError = require('../bizError')
-const BaseService = require('./baseService')
+const { BaseService, cloud } = require('./baseService')
 const Certificate = require('./certificate')
 const CheckRecordService = require('./checkRecordService')
 
 const moment = require('moment')
 moment.locale('zh-CN');
 
-const cloud = require('wx-server-sdk');
-cloud.init({
-  env: cloud.DYNAMIC_CURRENT_ENV
-});
 const db = cloud.database();
 const _ = db.command;
-const $ = _.aggregate;
+
 const COLLECTION_CERTIFICATE = 'certificate';
 const QR_CODE_TARGET_PAGE = 'pages/check/index';
 

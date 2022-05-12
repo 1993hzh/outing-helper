@@ -9,6 +9,7 @@ cloud.init({
 });
 const db = cloud.database();
 const _ = db.command;
+const $ = _.aggregate;
 
 class BaseService {
 
@@ -73,11 +74,7 @@ class BaseService {
     partial.updated_at = new Date();
     partial.updated_by = cloud.getWXContext().OPENID;
     partial.revision = ++record.revision;
-    // cannot use where for transaction
-    // https://developers.weixin.qq.com/community/develop/doc/0000c49965c2f8f47e9b4d97057000
-    // https://developers.weixin.qq.com/community/develop/doc/000826ef818bf0ce5ebcc5a2c5b000
-    // const updateResult = await this.db().collection(this.#collection)
-    const updateResult = await db.collection(this.#collection)
+    const updateResult = await this.db().collection(this.#collection)
       .where({ _id: record_id, revision: record_revision })
       .update({ data: partial });
     if (updateResult.stats.updated <= 0) {
@@ -109,4 +106,4 @@ class BaseService {
   }
 }
 
-module.exports = BaseService;
+module.exports = {BaseService, cloud};
