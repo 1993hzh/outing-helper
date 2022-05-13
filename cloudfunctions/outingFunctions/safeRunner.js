@@ -16,6 +16,10 @@ class SafeRunner {
   // transaction is not supported yet
   async run({ invocation, roles, transactional }) {
     const wx_open_id = cloud.getWXContext().OPENID;
+    if (!wx_open_id || wx_open_id.trim() === '') {
+      throw new BizError('找不到做人的证据');
+    }
+
     const users = await this._userService.findBy({
       criteria: {
         wx_open_id: wx_open_id,

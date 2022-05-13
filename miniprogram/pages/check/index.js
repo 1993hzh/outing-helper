@@ -11,8 +11,8 @@ Page({
 
   data: {
     showCheckPopup: false,
-    certificate: undefined,
-    checkRecords: [],
+    certificate_id: undefined,
+    checkRecord: undefined,
   },
 
   onLoad(options) {
@@ -32,12 +32,6 @@ Page({
 
   onShow() {
     this.getTabBar().onPageShow();
-  },
-
-  onShareAppMessage() {
-    return {
-      title: '出入检查'
-    }
   },
 
   // from external
@@ -72,6 +66,10 @@ Page({
         }
       })
       .catch((err) => {
+        if (err.errMsg === "scanCode:fail cancel") {
+          return;
+        }
+
         logger.error(err);
         Toast.fail({ message: '二维码扫描出错，请重试。', zIndex: 999999, });
       });
@@ -82,17 +80,15 @@ Page({
       message: '检入中，请稍后...',
       errorMessage: '检入发生错误，请联系管理员',
       request: {
-        service: 'certificateService',
+        service: 'checkRecordService',
         method: 'checkIn',
-        args: this.data.certificate
+        args: this.data.certificate_id
       },
       action: (result) => {
-        const data = result.data;
-        const processedCheckRecord = this.processCheckRecord(data.checkRecord);
-        this.data.checkRecords.push(processedCheckRecord);
+        const checkRecord = result.data;
+        this.processCheckRecord(checkRecord);
         this.setData({
-          certificate: data.certificate,
-          checkRecords: this.data.checkRecords
+          checkRecord: checkRecord,
         });
       },
     });
@@ -103,17 +99,15 @@ Page({
       message: '检出中，请稍后...',
       errorMessage: '检出发生错误，请联系管理员',
       request: {
-        service: 'certificateService',
+        service: 'checkRecordService',
         method: 'checkOut',
-        args: this.data.certificate
+        args: this.data.certificate_id
       },
       action: (result) => {
-        const data = result.data;
-        const processedCheckRecord = this.processCheckRecord(data.checkRecord);
-        this.data.checkRecords.push(processedCheckRecord);
+        const checkRecord = result.data;
+        this.processCheckRecord(checkRecord);
         this.setData({
-          certificate: data.certificate,
-          checkRecords: this.data.checkRecords
+          checkRecord: checkRecord,
         });
       },
     });
@@ -122,8 +116,8 @@ Page({
   onClosePopup() {
     this.setData({
       showCheckPopup: false,
-      certificate: undefined,
-      checkRecords: []
+      certificate_id: undefined,
+      checkRecord: undefined
     });
   },
 
@@ -136,26 +130,30 @@ Page({
       message: '正在加载...',
       errorMessage: '加载失败，请联系管理员',
       request: {
-        service: 'certificateService',
-        method: 'findCertificateWithCheckRecords',
+        service: 'checkRecordService',
+        method: 'findLastOutRecord',
         args: certId
       },
       action: async (result) => {
-        const { certificate, checkRecords } = result.data;
-        const displayData = checkRecords.map(e => this.processCheckRecord(e));
+        const checkRecords = result.data;
+        this.processCheckRecord(checkRecords[0]);
         this.setData({
-          certificate: certificate,
-          checkRecords: displayData,
-          showCheckPopup: true
+          certificate_id: certId,
+          checkRecord: checkRecords[0],
+          showCheckPopup: true,
         });
       },
     });
   },
 
   processCheckRecord(record) {
-    if (record && !record.displayDateTime) {
-      record.displayDateTime = new Date(record.created_at).toLocaleString('zh-CN');
+    const outDateTime = record?.out?.checked_at;
+    if (outDateTime) {
+      record.out.checked_at = new Date(outDateTime).toLocaleString('zh-CN');
     }
-    return record;
+    const inDateTime = record?.in?.checked_at;
+    if (inDateTime) {
+      record.in.checked_at = new Date(inDateTime).toLocaleString('zh-CN');
+    }
   }
 })

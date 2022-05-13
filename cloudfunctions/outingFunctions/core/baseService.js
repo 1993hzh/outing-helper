@@ -43,6 +43,8 @@ class BaseService {
     }
 
     const result = await query.get();
+    console.info(`FindBy args: ${JSON.stringify(arguments)} returned: ${JSON.stringify(result)}`);
+
     const records = result.data;
     return records.map(record => this.transform(record));
   }
@@ -63,8 +65,6 @@ class BaseService {
 
   // return after updated record if succeed
   async update(record, partial) {
-    console.info(`Updating record: ${JSON.stringify(record)}, update: ${JSON.stringify(partial)}`);
-
     const record_id = record._id;
     const record_revision = record.revision;
     if (!record_id || record_revision < 0) {
@@ -73,7 +73,9 @@ class BaseService {
 
     partial.updated_at = new Date();
     partial.updated_by = cloud.getWXContext().OPENID;
-    partial.revision = ++record.revision;
+    partial.revision = record_revision + 1;
+
+    console.info(`Updating {"record": ${JSON.stringify(record)}, "partial": ${JSON.stringify(partial)}}`);
     const updateResult = await this.db().collection(this.#collection)
       .where({ _id: record_id, revision: record_revision })
       .update({ data: partial });

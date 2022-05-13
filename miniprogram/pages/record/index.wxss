@@ -1,1 +1,11 @@
 /* pages/record/index.wxss */
+.custom-title-tag {
+  margin-right: 10rpx;
+  display:flex;
+  flex-direction: row;
+}
+
+.custom-cell-title {
+  display: flex;
+  flex-direction: row;
+}

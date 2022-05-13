@@ -12,6 +12,9 @@ class Certificate {
     building: undefined,
     room: undefined
   };
+  user = {
+    _id: undefined,
+  };
   qrcode_url = undefined;
   status = 1;// -1: deleted, 1: valid, 0: invalid
   revision = 0;
@@ -32,7 +35,7 @@ class Certificate {
     return user.bind(this);
   }
 
-  checkOut(user) {
+  checkOut(user = {}) {
     console.info(`Check-out certificate: ${this._id}.`);
     if (this.status !== 1) {
       console.error(`Cannot do checkOut for invalid certificate: ${JSON.stringify(this)}`);
@@ -40,36 +43,23 @@ class Certificate {
     }
 
     this.outing_count++;
-
-    let record = new CheckRecord();
-    record.check_type = 0;
-    record.certificate_id = this._id;
-    record.user = {
-      _id: user._id,
-      name: user.name,
-      residence: this.residence
-    };
-    return record;
+    return CheckRecord.outRecord({
+      user: user,
+      certificate: this,
+    });
   }
 
-  checkIn(user) {
+  checkIn(user = {}) {
     console.info(`Check-in certificate: ${this._id}.`);
     if (this.status !== 1) {
-      console.error(`Cannot do checkOut for invalid certificate: ${JSON.stringify(this)}`);
+      console.error(`Cannot do checkIn for invalid certificate: ${JSON.stringify(this)}`);
       throw new BizError('出入证暂时无效，不可使用');
     }
 
-    this.outing_count++;
-
-    let record = new CheckRecord();
-    record.check_type = 1;
-    record.certificate_id = this._id;
-    record.user = {
-      _id: user._id,
-      name: user.name,
-      residence: this.residence
-    };
-    return record;
+    return CheckRecord.inRecord({
+      user: user,
+      certificate: this,
+    });
   }
 
   //TODO

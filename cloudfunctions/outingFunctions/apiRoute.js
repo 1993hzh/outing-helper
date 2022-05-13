@@ -63,27 +63,10 @@ class ApiRoute {
         return await safeRunner.run({
           invocation: () => certificateService.findByResidence(args),
         });
-      case 'findCertificateWithCheckRecords':
-        return await safeRunner.run({
-          invocation: () => certificateService.findCertificateWithCheckRecords(args),
-          roles: ['checker', 'superAdmin'],
-        });
       case 'createQRcode':
         return await safeRunner.run({
           invocation: () => certificateService.createQRcode(args),
           roles: ['admin', 'superAdmin'],
-          transactional: true,
-        });
-      case 'checkIn':
-        return await safeRunner.run({
-          invocation: () => certificateService.checkIn(args),
-          roles: ['checker', 'superAdmin'],
-          transactional: true,
-        });
-      case 'checkOut':
-        return await safeRunner.run({
-          invocation: () => certificateService.checkOut(args),
-          roles: ['checker', 'superAdmin'],
           transactional: true,
         });
       case 'certify':
@@ -107,6 +90,23 @@ class ApiRoute {
       case 'findByCertificate':
         return await safeRunner.run({
           invocation: () => checkRecordService.findByCertificate(args),
+        });
+      case 'findLastOutRecord':
+        return await safeRunner.run({
+          invocation: () => checkRecordService.findLastOutRecord(args),
+          roles: ['checker', 'superAdmin'],
+        });
+      case 'checkIn':
+        return await safeRunner.run({
+          invocation: () => checkRecordService.checkIn(args),
+          roles: ['checker', 'superAdmin'],
+          transactional: true,
+        });
+      case 'checkOut':
+        return await safeRunner.run({
+          invocation: () => checkRecordService.checkOut(args),
+          roles: ['checker', 'superAdmin'],
+          transactional: true,
         });
       default:
         throw new Error(`Found invalid funtion call: ${service}.${method}`);

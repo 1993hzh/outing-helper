@@ -8,32 +8,61 @@
 </view>
 <van-popup
   show="{{ showCheckPopup }}"
-  onCloseProfilePopup
   bind:close="onClosePopup" 
-  custom-style="height: 75%;"
+  custom-style="height: 50%;"
   position="bottom"
   z-index="99999"
-  safe-area-inset-top="{{true}}">
+  safe-area-inset-top>
     <!-- records part -->
-    <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
-        <van-cell center value="{{item.displayDateTime}}" use-label-slot size="large">
-            <view slot="title">
-                <van-tag wx:if="{{item.check_type === 0}}" type="danger">出</van-tag>
-                <van-tag wx:if="{{item.check_type === 1}}" type="success">进</van-tag>
-                {{item.user.name}}
-            </view>
-            <view slot="label">
-                {{item.user.residence.building.name + item.user.residence.room}}
-            </view>
-            <van-icon slot="right-icon" name="clock-o"/>
-        </van-cell>
+    <van-cell-group wx:if="{{ checkRecord }}" title="最近一次外出记录">
+      <van-cell wx:if="{{checkRecord.out.checked_at}}" center use-label-slot size="large">
+        <view slot="title" class="custom-cell-title">
+          <van-tag type="danger" class="custom-title-tag">出</van-tag>
+          <view>
+            {{checkRecord.certificate.residence.building.name + checkRecord.certificate.residence.room}}
+            <block wx:if="{{checkRecord.user.name}}"> | {{checkRecord.user.name}}</block>
+          </view>
+        </view>
+        <view slot="label">
+          <van-icon name="clock-o" />
+          <text>{{checkRecord.out.checked_at}}</text>
+        </view>
+        <text>检查人：{{checkRecord.out.checked_by.name}}</text>
+      </van-cell>
+      <van-cell wx:if="{{checkRecord.in.checked_at}}" center use-label-slot size="large">
+        <view slot="title" class="custom-cell-title">
+          <van-tag type="success" class="custom-title-tag">进</van-tag>
+          <view>
+            {{checkRecord.certificate.residence.building.name + checkRecord.certificate.residence.room}}
+            <block wx:if="{{checkRecord.user.name}}"> | {{checkRecord.user.name}}</block>
+          </view>
+        </view>
+        <view slot="label">
+          <van-icon name="clock-o" />
+          <text>{{checkRecord.in.checked_at}}</text>
+        </view>
+        <text>检查人：{{checkRecord.in.checked_by.name}}</text>
+      </van-cell>
     </van-cell-group>
-    <block wx:if="{{checkRecords.length <= 0}}">
-      <van-empty description="暂无出入记录" />
-    </block>
     <!-- check part -->
-    <view wx:if="{{certificate}}" class="check-button-container">
-        <van-button custom-class="check-button" round type="primary" icon="wap-home" bind:click="onClickCheckIn">进</van-button>
-        <van-button custom-class="check-button" round type="danger" icon="shopping-cart" bind:click="onClickCheckOut">出</van-button>
+    <view wx:if="{{ certificate_id }}" class="check-button-container">
+        <van-button
+          custom-class="check-button"
+          type="primary"
+          icon="wap-home"
+          round
+          disabled="{{!checkRecord || checkRecord.in.checked_at}}"
+          bind:click="onClickCheckIn">
+          进
+        </van-button>
+        <van-button
+          custom-class="check-button"
+          type="danger"
+          icon="shopping-cart"
+          round
+          disabled="{{checkRecord && checkRecord.out.checked_at}}"
+          bind:click="onClickCheckOut">
+          出
+        </van-button>
     </view>
 </van-popup>

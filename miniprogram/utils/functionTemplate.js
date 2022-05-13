@@ -2,6 +2,12 @@ import * as logger from './log';
 import Toast from '@vant/weapp/toast/toast';
 import BizError from './bizError';
 
+Toast.setDefaultOptions({
+  zIndex: 999999,
+  duration: 2000,
+  forbidClick: true,
+});
+
 module.exports = {
   send({ message = '正在发送请求...', errorMessage = '服务出错，请联系管理员', request, action, errorHandler }) {
     if (!action || !request) {
@@ -9,7 +15,7 @@ module.exports = {
       return;
     }
 
-    Toast.loading({ message: message, forbidClick: true, zIndex: 999999, });
+    Toast.loading(message);
     return wx.cloud.callFunction({
       name: 'outingFunctions',
       data: request
@@ -30,11 +36,11 @@ module.exports = {
       }
 
       if (err instanceof BizError) {
-        Toast.fail({ message: err.message, forbidClick: true, zIndex: 999999, });
+        Toast.fail(err.message);
       } else {
-        Toast.fail({ message: errorMessage, forbidClick: true, zIndex: 999999, });
+        Toast.fail(errorMessage);
       }
-      
+
       logger.error(`CallFunction with request: ${JSON.stringify(request)} failed.`, err);
     });
   },

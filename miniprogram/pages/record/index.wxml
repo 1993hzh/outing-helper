@@ -11,17 +11,34 @@
       <van-empty description="暂无出入记录" />
     </block>
     <!-- records part -->
-    <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
-      <van-cell center value="{{item.displayDateTime}}" use-label-slot="{{true}}" size="large">
-        <view slot="title">
-          <van-tag wx:if="{{item.check_type === 0}}" type="danger">出</van-tag>
-          <van-tag wx:if="{{item.check_type === 1}}" type="success">进</van-tag>
-          {{item.user.name}}
+    <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id" title="第{{idx+1}}次">
+      <van-cell wx:if="{{item.out.checked_at}}" center use-label-slot size="large">
+        <view slot="title" class="custom-cell-title">
+          <van-tag type="danger" class="custom-title-tag">出</van-tag>
+          <view>
+            {{item.certificate.residence.building.name + item.certificate.residence.room}}
+            <block wx:if="{{item.user.name}}"> | {{item.user.name}}</block>
+          </view>
         </view>
         <view slot="label">
-          {{item.user.residence.building.name + item.user.residence.room}}
+          <van-icon name="clock-o" />
+          <text>{{item.out.checked_at}}</text>
         </view>
-        <van-icon slot="right-icon" name="clock-o" />
+        <text>检查人：{{item.out.checked_by.name}}</text>
+      </van-cell>
+      <van-cell wx:if="{{item.in.checked_at}}" center use-label-slot size="large">
+        <view slot="title" class="custom-cell-title">
+          <van-tag type="success" class="custom-title-tag">进</van-tag>
+          <view>
+            {{item.certificate.residence.building.name + item.certificate.residence.room}}
+            <block wx:if="{{item.user.name}}"> | {{item.user.name}}</block>
+          </view>
+        </view>
+        <view slot="label">
+          <van-icon name="clock-o" />
+          <text>{{item.in.checked_at}}</text>
+        </view>
+        <text>检查人：{{item.in.checked_by.name}}</text>
       </van-cell>
     </van-cell-group>
 </scroll-view>

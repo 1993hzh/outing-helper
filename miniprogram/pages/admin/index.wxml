@@ -35,7 +35,7 @@
     </van-cell-group>
   </van-tab>
   <!-- 楼栋管理 -->
-  <van-tab disabled="{{ true }}" title="楼栋管理" name="residence">
+  <van-tab disabled="{{ false }}" title="楼栋管理" name="residence">
     <!-- TODO -->
     <form bindsubmit="onSubmitResidences" bindreset="">
       <van-cell-group>
@@ -100,7 +100,7 @@
   bind:close="onCloseBuildingPopup"
   position="bottom"
   z-index="99999"
-  safe-area-inset-top="{{true}}">
+  safe-area-inset-top>
     <van-picker
       columns="{{ buildingInput.buildings }}"
       show-toolbar

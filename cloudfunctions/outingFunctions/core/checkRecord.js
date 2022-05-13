@@ -3,20 +3,29 @@ const BizError = require('../bizError')
 class CheckRecord {
 
   _id = undefined;
-  certificate_id = undefined;
-  user = {
+  certificate = {
     _id: undefined,
-    name: undefined,
     residence: {
-      _id: '',
-      building_id: -1,
-      building: '',
-      room: ''
-    }
+      _id: undefined,
+      building: {
+        id: undefined,
+        name: undefined,
+      },
+      room: undefined,
+    },
+    user: {
+      _id: undefined,
+    },
   };
-  checked_by = '';// checker name
-  check_type = 0;// 0: out, 1: in
-  status = 0;// -1: deleted, 0: normal
+  out = {
+    checked_at: undefined,
+    checked_by: undefined,
+  };
+  in = {
+    checked_at: undefined,
+    checked_by: undefined,
+  };
+  status = 0;// -1: deleted, 0: outed, 1: in
   revision = 0;
   created_at = undefined;
   created_by = undefined;
@@ -25,6 +34,40 @@ class CheckRecord {
 
   constructor(jsonObject) {
     Object.assign(this, jsonObject);
+  }
+
+  static inRecord({ user = {}, certificate }) {
+    if (!certificate) {
+      throw new Error('No certificate found when check in.');
+    }
+
+    const result = new CheckRecord();
+    result.certificate = {
+      _id: certificate._id,
+      residence: certificate.residence,
+      user: {
+        _id: user._id,
+      },
+    }
+    result.status = 1;
+    return result;
+  }
+
+  static outRecord({ user = {}, certificate }) {
+    if (!certificate) {
+      throw new Error('No certificate found when check in.');
+    }
+
+    const result = new CheckRecord();
+    result.certificate = {
+      _id: certificate._id,
+      residence: certificate.residence,
+      user: {
+        _id: user._id,
+      },
+    }
+    result.status = 0;
+    return result;
   }
 
   // addTo(certificate) {

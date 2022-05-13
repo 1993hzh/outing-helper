@@ -44,7 +44,7 @@ class UserService extends BaseService {
 
     const user = this.context.user;
     const managedBuildings = user.managed_buildings || [];
-    if (!managedBuildings.find(e => e.id === building)) {
+    if (!user.role.superAdmin && !managedBuildings.find(e => e.id === building)) {
       throw new BizError('只能查看自己管理的楼栋数据');
     }
 

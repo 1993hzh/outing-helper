@@ -56,8 +56,9 @@ Page({
       },
       action: async (result) => {
         const checkRecords = result.data;
+        this.processCheckRecord(checkRecords);
         this.setData({
-          checkRecords: this.processCheckRecord(checkRecords),
+          checkRecords: checkRecords,
           isRefreshing: false
         });
       },
@@ -65,9 +66,14 @@ Page({
   },
 
   processCheckRecord(records) {
-    records.forEach(e => {
-      if (!e.displayDateTime) {
-        e.displayDateTime = new Date(e.created_at).toLocaleString('zh-CN');
+    records.forEach(record => {
+      const outDateTime = record.out?.checked_at;
+      if (outDateTime) {
+        record.out.checked_at = new Date(outDateTime).toLocaleString('zh-CN');
+      }
+      const inDateTime = record.in?.checked_at;
+      if (inDateTime) {
+        record.in.checked_at = new Date(inDateTime).toLocaleString('zh-CN');
       }
     });
     return records;

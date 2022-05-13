@@ -38,9 +38,6 @@ class User {
         building: undefined,
         room: undefined
       },
-      certificate: {
-        _id: undefined
-      },
     }
   };
   status = 0;// -1: deleted, 0: initial, 1: valid, 10: hasPendingRecord

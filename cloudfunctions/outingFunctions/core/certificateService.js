@@ -1,7 +1,6 @@
 const BizError = require('../bizError')
 const { BaseService, cloud } = require('./baseService')
 const Certificate = require('./certificate')
-const CheckRecordService = require('./checkRecordService')
 
 const moment = require('moment')
 moment.locale('zh-CN');
@@ -14,11 +13,8 @@ const QR_CODE_TARGET_PAGE = 'pages/check/index';
 
 class CertificateService extends BaseService {
 
-  checkRecordService = undefined;
-
   constructor(context) {
     super(COLLECTION_CERTIFICATE, context);
-    this.checkRecordService = new CheckRecordService(context);
   }
 
   transform(jsonObject) {
@@ -55,12 +51,6 @@ class CertificateService extends BaseService {
       ],
       limit: 1
     });
-  }
-
-  async findCertificateWithCheckRecords(certId) {
-    const certificate = await this.findById(certId);
-    const checkRecords = await this.checkRecordService.findByCertificate(certId);
-    return { certificate, checkRecords };
   }
 
   async certify(residence) {
@@ -102,41 +92,6 @@ class CertificateService extends BaseService {
     } catch (error) {
       console.error(`create QR code for certificate: ${certificate._id} failed.`, error);
       throw error;
-    }
-  }
-
-  async checkIn(certificate) {
-    if (!certificate || !certificate._id) {
-      throw new BizError('出入证不存在');
-    }
-
-    const cert = new Certificate(certificate);
-    const checkRecord = cert.checkIn({});// user not implemented
-    return await this.persist(cert, checkRecord);
-  }
-
-  async checkOut(certificate) {
-    if (!certificate || !certificate._id) {
-      throw new BizError('出入证不存在');
-    }
-
-    const cert = new Certificate(certificate);
-    const checkRecord = cert.checkOut({});// user not implemented
-    return await this.persist(cert, checkRecord);
-  }
-
-  // private
-  async persist(certificate, checkRecord) {
-    try {
-      const inserted = await this.checkRecordService.insert(checkRecord);
-      const result = await this.update(certificate, { outing_count: certificate.outing_count });
-      return {
-        certificate: result,
-        checkRecord: inserted,
-      };
-    } catch (error) {
-      console.error(`certificate: ${JSON.stringify(certificate)} persist failed.`, error);
-      throw error
     }
   }
 }

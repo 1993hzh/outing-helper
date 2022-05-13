@@ -52,7 +52,12 @@
   </form>
 </view>
 <!-- popup part -->
-<van-popup show="{{ buildingInput.showPicker || roomInput.showPicker }}" bind:close="onClosePopup" position="bottom" z-index="99999" safe-area-inset-top="{{true}}">
+<van-popup
+  show="{{ buildingInput.showPicker || roomInput.showPicker }}"
+  bind:close="onClosePopup"
+  position="bottom"
+  z-index="99999"
+  safe-area-inset-top>
   <view wx:if="{{ buildingInput.showPicker }}">
     <van-picker columns="{{ buildingInput.values }}" show-toolbar loading="{{ buildingInput.loading}}" title="选择楼号" value-key="name" bind:cancel="onClosePopup" bind:confirm="onBuildingPickerConfirm" />
   </view>
