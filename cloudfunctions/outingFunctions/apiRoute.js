@@ -4,6 +4,7 @@ const CertificateService = require('./core/certificateService')
 const CheckRecordService = require('./core/checkRecordService')
 const ResidenceService = require('./core/residenceService')
 const UserService = require('./core/userService')
+const parse = require('./utils/parser')
 
 class ApiRoute {
 
@@ -140,11 +141,18 @@ class ApiRoute {
         return await residenceService.findById(args);
       case 'listByBuilding':
         return await residenceService.listByBuilding(args);
+      case 'toggle':
+        return await safeRunner.run({
+          invocation: () => residenceService.toggle(args),
+          roles: ['admin', 'superAdmin'],
+        });
       case 'batchCreate':
         return await safeRunner.run({
           invocation: () => residenceService.batchCreate(args),
           roles: ['admin', 'superAdmin'],
         });
+      // case 'built-in':
+      //   return await parse(residenceService);
       default:
         throw new Error(`Found invalid funtion call: ${service}.${method}`);
     }

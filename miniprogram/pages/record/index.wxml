@@ -5,7 +5,7 @@
     refresher-enabled="true"
     bindrefresherrefresh="onScrollRefresh"
     enable-back-to-top="true"
-    style="height: calc(90vh - env(safe-area-inset-bottom));;">
+    style="height: calc(90vh - env(safe-area-inset-bottom));">
     <!-- empty part -->
     <block wx:if="{{checkRecords.length <= 0}}">
       <van-empty description="暂无出入记录" />

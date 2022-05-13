@@ -1,6 +1,7 @@
 // pages/admin/index.js
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
+import Dialog from '@vant/weapp/dialog/dialog';
 import BizError from '../../utils/bizError';
 import functionTemplate from '../../utils/functionTemplate';
 
@@ -122,6 +123,9 @@ Page({
   onClickChangeTab(event) {
     const value = event.detail.name;
     this.onTabChanged(value);
+    this.setData({
+      activeTab: value,
+    })
   },
 
   onTabChanged(tab) {
@@ -169,7 +173,7 @@ Page({
 
   initResidenceTabContent() {
     const building_id = this.data.buildingOptionValue;
-    const status = this.data.residenceDropDown?.statusOptionValue;
+    const status = this.data.residenceDropDown.statusOptionValue;
     if (building_id === undefined || status === undefined) {
       return;
     }
@@ -292,7 +296,7 @@ Page({
       action: (result) => {
         const pendingUsers = this.data.pendingUsers;
         const selectedUser = this.data.selectedUser;
-        const index = pendingUsers.find(e => e._id === selectedUser._id);
+        const index = pendingUsers.findIndex(e => e._id === selectedUser._id);
         pendingUsers.splice(index, 1);
         this.setData({
           pendingUsers: pendingUsers,
@@ -351,9 +355,9 @@ Page({
     functionTemplate.send({
       request: {
         service: 'residenceService',
-        method: 'batchCreate',
+        method: 'built-in',
         args: {
-          building: this.data.buildingInput.currentBuilding,
+          building: building,
           rooms: formValues.roomList
         }
       },
@@ -369,6 +373,34 @@ Page({
       'residenceDropDown.statusOptionValue': value,
     });
     this.initResidenceTabContent();
+  },
+
+  onClickResidenceCell(event) {
+    const residence = event.currentTarget.dataset.residence;
+    const message = residence.status === 1 ? '调整成无人居住' : '调整成有人居住';
+    Dialog.confirm({
+      showCancelButton: true,
+      closeOnClickOverlay: true,
+      title: '调整状态',
+      message: message,
+    }).then(() => {
+      functionTemplate.send({
+        request: {
+          service: 'residenceService',
+          method: 'toggle',
+          args: residence
+        },
+        action: (result) => {
+          const residences = this.data.residences;
+          const index = residences.findIndex(e => e._id === result.data._id);
+          console.log(index)
+          residences.splice(index, 1);
+          this.setData({ residences: residences });
+        },
+      });
+    }).catch(() => {
+      // on cancel
+    });
   },
 
   onPermRoleChange(event) {

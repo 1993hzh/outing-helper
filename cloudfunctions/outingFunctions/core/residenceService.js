@@ -34,13 +34,28 @@ class ResidenceService extends BaseService {
         status: status,
       },
       orderBy: [
-        { prop: 'created_at', type: 'asc' }
+        { prop: 'room', type: 'asc' }
       ],
     });
   }
 
+  async toggle(residence) {
+    if (!residence) {
+      throw new Error('Residence not found.');
+    }
+
+    const user = this.context.user;
+    const managedBuildings = user.managed_buildings || [];
+    if (!user.role.superAdmin && !managedBuildings.find(e => e.id === residence.building.id)) {
+      throw new BizError('只能操作自己管理的楼栋数据');
+    }
+
+    const status = 1 - residence.status;
+    return this.update(residence, { status: status });
+  }
+
   // return db record if the residence exists
-  async create({ building, room }) {
+  async create({ building, room, find = true }) {
     if (!building) {
       throw new Error(`Cannot find building with name: ${buildingName}.`);
     }
@@ -53,15 +68,19 @@ class ResidenceService extends BaseService {
       building: building,
       room: room,
       status: 1,
+      revision: 0,
     };
-    const exists = await this.findBy({
-      criteria: partialResidence,
-      orderBy: [],
-      limit: 1,
-    });
-    if (exists && exists.length > 0) {
-      console.info(`Return existing Residence: ${JSON.stringify(exists)}`);
-      return exists[0];
+
+    if (find) {
+      const exists = await this.findBy({
+        criteria: partialResidence,
+        orderBy: [],
+        limit: 1,
+      });
+      if (exists && exists.length > 0) {
+        console.info(`Return existing Residence: ${JSON.stringify(exists)}`);
+        return exists[0];
+      }
     }
 
     console.info(`Inserting Residence: ${JSON.stringify(partialResidence)}`);
