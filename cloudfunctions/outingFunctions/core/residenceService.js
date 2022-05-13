@@ -21,14 +21,17 @@ class ResidenceService extends BaseService {
     this.certificateService = new CertificateService(context);
   }
 
-  async listByBuilding(building) {
-    if (!building) {
-      throw new Error(`Invalid building: ${JSON.stringify(building)}.`);
+  async listByBuilding({ building_id: building_id, status: status = 1 }) {
+    if (!building_id) {
+      throw new Error(`Invalid building: ${building_id}.`);
     }
 
     return await this.findBy({
       criteria: {
-        building: { id: building.id },
+        building: {
+          id: building_id
+        },
+        status: status,
       },
       orderBy: [
         { prop: 'created_at', type: 'asc' }
@@ -49,7 +52,7 @@ class ResidenceService extends BaseService {
     const partialResidence = {
       building: building,
       room: room,
-      status: 0,
+      status: 1,
     };
     const exists = await this.findBy({
       criteria: partialResidence,

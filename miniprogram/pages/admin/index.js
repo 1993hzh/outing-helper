@@ -15,12 +15,12 @@ Page({
 
   data: {
     userRole: {},
-    buildings: [],
+    buildingOptions: [],
+    buildingOptionValue: undefined,
+    residences:[],
     activeTab: 'profile',
     // ---- for profile tab
     profileDropDown: {
-      buildingOptions: [],
-      buildingOptionValue: undefined,
       statusOptions: [
         { text: '审核中', value: 0 },
         { text: '已驳回', value: -1 },
@@ -31,10 +31,21 @@ Page({
     selectedUser: {},
     showProfilePopup: false,
     // ---- end
+    // ---- for residence tab
+    residenceDropDown: {
+      statusOptions: [
+        { text: '有人', value: 1 },
+        { text: '无人', value: 0 },
+      ],
+      statusOptionValue: 1,
+    },
+    // ----end
     // ---- for permission tab
     permissionDropDown: {
-      buildingOptions: [],
-      buildingOptionValue: undefined,
+      buildingOptions: [
+        { text: '全部楼栋', value: -1 }
+      ],
+      buildingOptionValue: -1,
       roleOptions: [
         { text: '信息员', value: 'admin' },
         { text: '门卫', value: 'checker' },
@@ -92,55 +103,48 @@ Page({
         method: 'list',
       },
       action: (result) => {
-        this.setData({
-          buildings: result.data,
+        const user = app.globalData.loginUser;
+        const buildings = user.role?.superAdmin ? result.data : user?.managed_buildings;
+        const managedBuildings = buildings?.map(e => {
+          return { text: e.name, value: e.id, };
         });
-        this.initProfileTab();
+        const firstBuilding = managedBuildings[0];
+        this.setData({
+          userRole: user.role,
+          'buildingOptions': managedBuildings || [],
+          'buildingOptionValue': firstBuilding?.value,
+        });
+        this.onTabChanged(this.data.activeTab);
       },
     });
   },
 
   onClickChangeTab(event) {
     const value = event.detail.name;
-    switch (value) {
+    this.onTabChanged(value);
+  },
+
+  onTabChanged(tab) {
+    switch (tab) {
       case TAB_PROFILE:
-        this.initProfileTab();
+        this.initProfileTabContent();
         break;
       case TAB_RESIDENCE:
-        // TODO
+        this.initResidenceTabContent();
         break;
       case TAB_COMMUNITY:
         // TODO
         break;
       case TAB_PERMISSION:
-        this.initPermissionTab();
+        this.initPermissionTabContent();
         break;
       default:
         break;
     }
   },
 
-  initProfileTab() {
-    const user = app.globalData.loginUser;
-    const buildings = user.role?.superAdmin ? this.data.buildings : user?.managed_buildings;
-    const managedBuildings = buildings?.map(e => {
-      return {
-        text: e.name,
-        value: e.id,
-      };
-    });
-    const firstBuilding = managedBuildings?.find(e => e !== undefined);
-    this.setData({
-      userRole: user.role,
-      'profileDropDown.buildingOptions': managedBuildings || [],
-      'profileDropDown.buildingOptionValue': firstBuilding?.value,
-    });
-
-    this.initProfileTabContent();
-  },
-
   initProfileTabContent() {
-    const building = this.data.profileDropDown?.buildingOptionValue;
+    const building = this.data.buildingOptionValue;
     const status = this.data.profileDropDown?.statusOptionValue;
     if (building === undefined || status === undefined) {
       return;
@@ -163,35 +167,32 @@ Page({
     });
   },
 
-  initPermissionTab() {
-    const buildingOptions = this.data.buildings.map(e => {
-      return {
-        text: e.name,
-        value: e.id,
-      };
-    });
-    buildingOptions.unshift({ text: '全部楼栋', value: -1 });
+  initResidenceTabContent() {
+    const building_id = this.data.buildingOptionValue;
+    const status = this.data.residenceDropDown?.statusOptionValue;
+    if (building_id === undefined || status === undefined) {
+      return;
+    }
 
-    this.setData({
-      'permissionDropDown.buildingOptions': buildingOptions,
-      'permissionDropDown.buildingOptionValue': -1,
-    });
-    this.initPermissionTabContent();
+    functionTemplate.send({
+      request: {
+        service: 'residenceService',
+        method: 'listByBuilding',
+        args: { building_id, status, },
+      },
+      action: (result) => {
+        this.setData({
+          residences: result.data,
+        });
+      },
+    })
   },
 
-
   initPermissionTabContent(searchCriteria = {}) {
-    const buildingId = this.data.permissionDropDown.buildingOptionValue;
+    const criteria = {};
     const role = this.data.permissionDropDown.roleOptionValue;
     const roleKey = `role.${role}`;
-    let criteria = {};
     criteria[roleKey] = true;
-    if (buildingId >= 0) {
-      criteria = {
-        ...criteria,
-        ...{ 'residence.building.id': buildingId }
-      }
-    }
 
     functionTemplate.send({
       request: {
@@ -207,18 +208,12 @@ Page({
     })
   },
 
-  onCloseBuildingPopup() {
-    this.setData({
-      showBuildingPopup: false
-    });
-  },
-
   onBuildingChange(event) {
     const value = event.detail;
     this.setData({
-      'profileDropDown.buildingOptionValue': value,
+      'buildingOptionValue': value,
     });
-    this.initProfileTabContent();
+    this.onTabChanged(this.data.activeTab);
   },
 
   onStatusChange(event) {
@@ -308,6 +303,12 @@ Page({
     });
   },
 
+  onCloseBuildingPopup() {
+    this.setData({
+      showBuildingPopup: false
+    });
+  },
+
   onClickBuildingInput() {
     if (this.data.buildingInput.buildings?.length > 0) {
       this.setData({
@@ -362,12 +363,12 @@ Page({
     });
   },
 
-  onPermBuildingChange(event) {
+  onResidenceStatusChange(event) {
     const value = event.detail;
     this.setData({
-      'permissionDropDown.buildingOptionValue': value
+      'residenceDropDown.statusOptionValue': value,
     });
-    this.initPermissionTabContent();
+    this.initResidenceTabContent();
   },
 
   onPermRoleChange(event) {

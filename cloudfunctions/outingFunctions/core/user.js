@@ -56,8 +56,7 @@ class User {
       throw new Error(`Invalid user to bind certificate.`);
     }
 
-    const pendingCert = this.pending.data.certificate;
-    pendingCert._id = certificate._id;
+    this.certificate._id = certificate._id;
     console.info(`Binding certificate: ${certificate._id} to user: ${this._id}.`);
     return this;
   }
@@ -69,11 +68,11 @@ class User {
         role: {
           resident: true,
         },
+        certificate: this.certificate,
         status: 1,
         pending: command.set({// clear pending data
           data: {
             residence: {},
-            certificate: {},
           },
           comment: '',
           status: 1,

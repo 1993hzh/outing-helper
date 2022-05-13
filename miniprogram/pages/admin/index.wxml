@@ -7,8 +7,8 @@
     <van-dropdown-menu z-index="100000">
       <van-dropdown-item
         bind:change="onBuildingChange"
-        value="{{ profileDropDown.buildingOptionValue }}"
-        options="{{ profileDropDown.buildingOptions }}" />
+        value="{{ buildingOptionValue }}"
+        options="{{ buildingOptions }}" />
       <van-dropdown-item
         bind:change="onStatusChange"
         value="{{ profileDropDown.statusOptionValue }}"
@@ -35,8 +35,27 @@
     </van-cell-group>
   </van-tab>
   <!-- 楼栋管理 -->
-  <van-tab disabled="{{ false }}" title="楼栋管理" name="residence">
-    <!-- TODO -->
+  <van-tab title="楼栋管理" name="residence">
+    <van-dropdown-menu z-index="100000">
+      <van-dropdown-item
+        bind:change="onBuildingChange"
+        value="{{ buildingOptionValue }}"
+        options="{{ buildingOptions }}" />
+      <van-dropdown-item
+        bind:change="onResidenceStatusChange"
+        value="{{ residenceDropDown.statusOptionValue }}"
+        options="{{ residenceDropDown.statusOptions }}" />
+    </van-dropdown-menu>
+    <van-cell-group wx:for="{{ residences }}" wx:for-item="item" wx:for-index="idx" wx:key="_id">
+      <van-cell center use-label-slot size="large">
+        <view slot="title" class="custom-cell-title">
+          {{item.room}}
+          <van-tag wx:if="{{item.status === 1}}" type="success" class="custom-title-tag">有人</van-tag>
+          <van-tag wx:if="{{item.status === 0}}" type="danger" class="custom-title-tag">无人</van-tag>
+        </view>
+      </van-cell>
+    </van-cell-group>
+    <!--
     <form bindsubmit="onSubmitResidences" bindreset="">
       <van-cell-group>
         <van-field id="building" name="building" value="{{ buildingInput.currentBuilding.name }}" label="楼栋号" clickable required readonly placeholder="请选择楼栋号" left-icon="location-o" right-icon="info-o" bind:click-input="onClickBuildingInput" />
@@ -44,16 +63,16 @@
       </van-cell-group>
       <van-button custom-class="submit-button" round block type="primary" icon="completed" form-type="submit">生成住处</van-button>
     </form>
+    -->
   </van-tab>
   <!-- 小区管理 -->
-  <van-tab hidden="{{ !userRole.superAdmin }}" disabled="{{ true }}" title="小区管理" name="community">
+  <van-tab disabled="{{ !userRole.superAdmin }}" title="小区管理" name="community">
     <!-- TODO -->
   </van-tab>
   <!-- 权限管理 -->
-  <van-tab hidden="{{ !userRole.superAdmin }}" title="权限管理" name="permission">
+  <van-tab title="权限管理" name="permission" disabled="{{ !userRole.superAdmin }}">
     <van-dropdown-menu z-index="100000">
       <van-dropdown-item
-        bind:change="onPermBuildingChange"
         value="{{ permissionDropDown.buildingOptionValue }}"
         options="{{ permissionDropDown.buildingOptions }}" />
       <van-dropdown-item

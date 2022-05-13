@@ -185,7 +185,9 @@ Page({
       request: {
         service: 'residenceService',
         method: 'listByBuilding',
-        args: currentBuilding
+        args: {
+          building_id: currentBuilding.id,
+        }
       },
       action: (result) => {
         this.setData({

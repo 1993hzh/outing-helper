@@ -3,7 +3,7 @@ import Toast from '@vant/weapp/toast/toast';
 import BizError from './bizError';
 
 Toast.setDefaultOptions({
-  zIndex: 999999,
+  zIndex: 9999999,
   duration: 2000,
   forbidClick: true,
 });
