@@ -63,7 +63,8 @@
     "van-grid-item": "@vant/weapp/grid-item/index",
     "van-search": "@vant/weapp/search/index",
     "van-action-sheet": "@vant/weapp/action-sheet/index",
-    "van-dialog": "@vant/weapp/dialog/index"
+    "van-dialog": "@vant/weapp/dialog/index",
+    "van-checkbox": "@vant/weapp/checkbox/index"
   },
   "useExtendedLib": {
     "weui": true

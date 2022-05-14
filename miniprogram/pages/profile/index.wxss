@@ -10,3 +10,12 @@
 .custom-title-text {
   margin-right: 4rpx;
 }
+
+.consent-check-box {
+  font-size: 25rpx;
+  margin-top: 20rpx;
+  margin-left: 20rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}

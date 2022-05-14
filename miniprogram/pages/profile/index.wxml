@@ -34,6 +34,20 @@
       <van-field wx:if="{{ nameInput.show }}" name="userName" value="{{ nameInput.current }}" label="姓名" size="large" placeholder="请输入姓名" disabled="{{ !editable }}" required center error="{{ nameInput.error }}" left-icon="contact" right-icon="info-o" />
       <van-field wx:if="{{ contactInput.show }}" name="contactNumber" value="{{ contactInput.current }}" label="手机号" size="large" placeholder="请输入手机号" disabled="{{ !editable }}" required center error="{{ contactInput.error }}" left-icon="phone-o" right-icon="info-o" />
     </van-cell-group>
+    <view class="consent-check-box">
+      <van-checkbox
+        icon-size="15px"
+        shape="square"
+        value="{{ consentChecked }}"
+        disabled="{{ !editable }}"
+        label-disabled
+        bind:change="onToggleConsent">
+        {{ consentChecked ? "已阅读并同意" : "请阅读并同意" }}
+        <view bindtap="{{editable ? 'onConsentClick' : '' }}" style="text-decoration: underline;display: inline;">
+          《东昌新村疫情出行细则》
+        </view>
+      </van-checkbox>
+    </view>
     <view wx:if="{{ !editable }}">
       <van-button custom-class="form-button" round block type="info" icon="edit" form-type="reset">
         修改信息

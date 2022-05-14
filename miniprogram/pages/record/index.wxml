@@ -1,5 +1,15 @@
 <van-toast id="van-toast" />
 
+<van-dropdown-menu>
+  <van-dropdown-item
+    bind:change="onUserChange"
+    value="{{ userOptionValue }}"
+    options="{{ userOptions }}" />
+  <van-dropdown-item
+    bind:change="onStatusChange"
+    value="{{ statusOptionValue }}"
+    options="{{ statusOptions }}" />
+</van-dropdown-menu>
 <scroll-view scroll-y="true"
     refresher-triggered="{{isRefreshing}}"
     refresher-enabled="true"
@@ -8,7 +18,7 @@
     style="height: calc(90vh - env(safe-area-inset-bottom));">
     <!-- empty part -->
     <block wx:if="{{checkRecords.length <= 0}}">
-      <van-empty description="暂无出入记录" />
+      <van-empty description="本周暂无出入记录" />
     </block>
     <!-- records part -->
     <van-cell-group wx:for="{{checkRecords}}" wx:for-item="item" wx:for-index="idx" wx:key="_id" title="第{{idx+1}}次">

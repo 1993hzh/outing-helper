@@ -74,6 +74,7 @@ class BuildingService {
   }
 
   async list() {
+    // return [];
     return this.#BUILT_IN;
   }
 }

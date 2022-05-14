@@ -51,7 +51,9 @@ class ResidenceService extends BaseService {
     }
 
     const status = 1 - residence.status;
-    return this.update(residence, { status: status });
+    const certificate = await this.certificateService.findByResidence(residence);
+    await this.certificateService.toggle(certificate);
+    return await this.update(residence, { status: status });
   }
 
   // return db record if the residence exists

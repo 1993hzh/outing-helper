@@ -2,26 +2,39 @@
 <van-toast id="van-toast" />
 <van-dialog id="van-dialog" />
 
-<scroll-view scroll-y="true"
-    enable-back-to-top="true"
-    style="height: calc(90vh - env(safe-area-inset-bottom));">
-  <van-tabs type="line" sticky animated active="{{ activeTab }}" bind:change="onClickChangeTab">
-    <!-- 居民信息审核 -->
-    <van-tab title="居民审核" name="profile">
-      <van-dropdown-menu z-index="100000">
-        <van-dropdown-item
-          bind:change="onBuildingChange"
-          value="{{ buildingOptionValue }}"
-          options="{{ buildingOptions }}" />
-        <van-dropdown-item
-          bind:change="onStatusChange"
-          value="{{ profileDropDown.statusOptionValue }}"
-          options="{{ profileDropDown.statusOptions }}" />
-      </van-dropdown-menu>
-      <block wx:if="{{pendingUsers.length <= 0}}">
-        <van-empty description="暂无需要审核的居民" />
+<van-tabs type="line" sticky animated active="{{ activeTab }}" bind:change="onClickChangeTab">
+  <!-- 居民信息审核 -->
+  <van-tab title="居民审核" name="profile">
+    <van-dropdown-menu>
+      <van-dropdown-item
+        popup-style="height: 50%;"
+        bind:change="onBuildingChange"
+        value="{{ buildingOptionValue }}"
+        options="{{ buildingOptions }}" />
+      <van-dropdown-item
+        bind:change="onStatusChange"
+        value="{{ profileDropDown.statusOptionValue }}"
+        options="{{ profileDropDown.statusOptions }}" />
+    </van-dropdown-menu>
+    <scroll-view scroll-y="true" enable-back-to-top="true" class="scroll-view-container">
+      <block wx:if="{{pendingUsers.length <= 0 && approvedUsers <= 0}}">
+        <van-empty description="暂无符合条件的居民" />
       </block>
       <van-cell-group>
+        <van-cell
+          wx:for="{{ approvedUsers }}" wx:for-item="item" wx:for-index="idx" wx:key="_id"
+          center
+          size="large"
+          use-label-slot>
+          {{ item.residence.room }}
+          <view slot="title" class="profile-wx-container">
+            <image class="profile-wx-avatar" src="{{ item.wx_avatar_url }}" mode="heightFix"	lazy-load="true" />
+            <text>{{ item.wx_nick_name }}</text>
+          </view>
+          <view slot="label">
+            {{ item.name }}
+          </view>
+        </van-cell>
         <van-cell
           wx:for="{{ pendingUsers }}" wx:for-item="item" wx:for-index="idx" wx:key="_id"
           center
@@ -38,19 +51,22 @@
           </view>
         </van-cell>
       </van-cell-group>
-    </van-tab>
-    <!-- 楼栋管理 -->
-    <van-tab title="楼栋管理" name="residence">
-      <van-dropdown-menu z-index="100000">
-        <van-dropdown-item
-          bind:change="onBuildingChange"
-          value="{{ buildingOptionValue }}"
-          options="{{ buildingOptions }}" />
-        <van-dropdown-item
-          bind:change="onResidenceStatusChange"
-          value="{{ residenceDropDown.statusOptionValue }}"
-          options="{{ residenceDropDown.statusOptions }}" />
-      </van-dropdown-menu>
+    </scroll-view>
+  </van-tab>
+  <!-- 楼栋管理 -->
+  <van-tab title="楼栋管理" name="residence">
+    <van-dropdown-menu z-index="100000">
+      <van-dropdown-item
+        popup-style="height: 50%;"
+        bind:change="onBuildingChange"
+        value="{{ buildingOptionValue }}"
+        options="{{ buildingOptions }}" />
+      <van-dropdown-item
+        bind:change="onResidenceStatusChange"
+        value="{{ residenceDropDown.statusOptionValue }}"
+        options="{{ residenceDropDown.statusOptions }}" />
+    </van-dropdown-menu>
+    <scroll-view scroll-y="true" enable-back-to-top="true" class="scroll-view-container">
       <van-cell-group>
         <van-cell
           wx:for="{{ residences }}" wx:for-item="item" wx:for-index="idx" wx:key="_id"
@@ -76,34 +92,38 @@
         <van-button custom-class="submit-button" round block type="primary" icon="completed" form-type="submit">生成住处</van-button>
       </form>
       -->
-    </van-tab>
-    <!-- 小区管理 -->
-    <van-tab disabled="{{ !userRole.superAdmin }}" title="小区管理" name="community">
-      <!-- TODO -->
-    </van-tab>
-    <!-- 权限管理 -->
-    <van-tab title="权限管理" name="permission" disabled="{{ !userRole.superAdmin }}">
-      <van-dropdown-menu z-index="100000">
-        <van-dropdown-item
-          value="{{ permissionDropDown.buildingOptionValue }}"
-          options="{{ permissionDropDown.buildingOptions }}" />
-        <van-dropdown-item
-          bind:change="onPermRoleChange"
-          value="{{ permissionDropDown.roleOptionValue }}"
-          options="{{ permissionDropDown.roleOptions }}" />
-      </van-dropdown-menu>
-      <van-search
-        value="{{ userSearchValue }}"
-        placeholder="请输入姓名"
-        show-action
-        shape="round"
-        input-align="center"
-        bind:search="onUserSearch"
-        bind:cancel="onUserSearchCancel">
-      </van-search>
-      <block wx:if="{{permUsers.length <= 0}}">
-        <van-empty description="暂无数据" />
-      </block>
+    </scroll-view>
+  </van-tab>
+  <!-- 小区管理 -->
+  <van-tab disabled="{{ !userRole.superAdmin }}" title="小区管理" name="community">
+    <scroll-view scroll-y="true" enable-back-to-top="true" class="scroll-view-container">
+    <!-- TODO -->
+    </scroll-view>
+  </van-tab>
+  <!-- 权限管理 -->
+  <van-tab title="权限管理" name="permission" disabled="{{ !userRole.superAdmin }}">
+    <van-dropdown-menu z-index="100000">
+      <van-dropdown-item
+        value="{{ permissionDropDown.buildingOptionValue }}"
+        options="{{ permissionDropDown.buildingOptions }}" />
+      <van-dropdown-item
+        bind:change="onPermRoleChange"
+        value="{{ permissionDropDown.roleOptionValue }}"
+        options="{{ permissionDropDown.roleOptions }}" />
+    </van-dropdown-menu>
+    <van-search
+      value="{{ userSearchValue }}"
+      placeholder="请输入姓名"
+      show-action
+      shape="round"
+      input-align="center"
+      bind:search="onUserSearch"
+      bind:cancel="onUserSearchCancel">
+    </van-search>
+    <block wx:if="{{permUsers.length <= 0}}">
+      <van-empty description="暂无数据" />
+    </block>
+    <scroll-view scroll-y="true" enable-back-to-top="true" class="scroll-view-container">
       <van-cell-group>
         <van-cell
           wx:for="{{ permUsers }}" wx:for-item="item" wx:for-index="idx" wx:key="_id"
@@ -124,9 +144,9 @@
           </view>
         </van-cell>
       </van-cell-group>
-    </van-tab>
-  </van-tabs>
-</scroll-view>
+    </scroll-view>
+  </van-tab>
+</van-tabs>
 <!-- building popup part -->
 <van-popup
   show="{{ showBuildingPopup }}"
@@ -175,12 +195,14 @@
     <van-grid-item>
       <view slot="text">{{ selectedUser.pending.data.name }}</view>
     </van-grid-item>
+    <!--
     <van-grid-item>
       <view slot="text">{{ selectedUser.contact_number }}</view>
     </van-grid-item>
     <van-grid-item>
       <view slot="text">{{ selectedUser.pending.data.contact_number }}</view>
     </van-grid-item>
+    -->
   </van-grid>
   <!-- check part -->
   <view class="profile-button-container">

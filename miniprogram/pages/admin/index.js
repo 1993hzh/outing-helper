@@ -11,6 +11,7 @@ const TAB_PROFILE = 'profile';
 const TAB_RESIDENCE = 'residence';
 const TAB_COMMUNITY = 'community';
 const TAB_PERMISSION = 'permission';
+const PHONE_REGEX = /(\d{3})\d*(\d{4})/;
 
 Page({
 
@@ -24,11 +25,13 @@ Page({
     profileDropDown: {
       statusOptions: [
         { text: '审核中', value: 0 },
+        { text: '已审核', value: 1 },
         { text: '已驳回', value: -1 },
       ],
       statusOptionValue: 0,
     },
     pendingUsers: [],
+    approvedUsers: [],
     selectedUser: {},
     showProfilePopup: false,
     // ---- end
@@ -157,15 +160,17 @@ Page({
     functionTemplate.send({
       request: {
         service: 'userService',
-        method: 'listPendingUsers',
+        method: 'listUsers',
         args: {
           building: building,
           status: status,
         }
       },
       action: (result) => {
+        const data = result.data;
         this.setData({
-          pendingUsers: result.data,
+          approvedUsers: status === 1 ? data : [],
+          pendingUsers: status !== 1 ? data : []
         });
       },
     });
@@ -355,7 +360,7 @@ Page({
     functionTemplate.send({
       request: {
         service: 'residenceService',
-        method: 'built-in',
+        method: 'batchCreate',
         args: {
           building: building,
           rooms: formValues.roomList

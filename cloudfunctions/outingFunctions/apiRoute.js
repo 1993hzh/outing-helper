@@ -186,9 +186,9 @@ class ApiRoute {
           roles: ['admin', 'superAdmin'],
           transactional: true,
         });
-      case 'listPendingUsers':
+      case 'listUsers':
         return await safeRunner.run({
-          invocation: () => userService.listPendingUsers(args),
+          invocation: () => userService.listUsers(args),
           roles: ['admin', 'superAdmin'],
         });
       case 'findUsersByCriteria':

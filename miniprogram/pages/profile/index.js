@@ -52,6 +52,7 @@ Page({
       nickName: '',
       avatarUrl: '',
     },
+    consentChecked: false,
   },
 
   onLoad(options) {
@@ -272,6 +273,11 @@ Page({
       return;
     }
 
+    if (!this.data.consentChecked) {
+      Toast.fail('请阅读并同意《东昌新村疫情出行细则》');
+      return;
+    }
+
     const residence = this.data.roomInput.current;
     const wxProfile = this.data.wxProfileInput;
     const user = app.globalData.loginUser;
@@ -294,5 +300,38 @@ Page({
         app.globalData.loginUser = result.data;
       },
     });
+  },
+
+  onToggleConsent(event) {
+    this.setData({
+      consentChecked: event.detail,
+    });
+  },
+
+  onConsentClick() {
+    const _this = this;
+    wx.cloud.downloadFile({
+      fileID: 'cloud://cloud1-9ggmda0qb8fc88af.636c-cloud1-9ggmda0qb8fc88af-1311685783/consent.pdf',
+      success: function (resp) {
+        const filePath = resp.tempFilePath;
+        wx.openDocument({
+          filePath: filePath,
+          fileType: 'pdf',
+          success: function (resp) {
+            _this.setData({
+              consentChecked: true,
+            });
+          },
+          fail: function(err) {
+            Toast.fail('打开失败');
+            logger.error(err);
+          }
+        })
+      },
+      fail: function(err) {
+        Toast.fail('打开失败');
+        logger.error(err);
+      }
+    })
   },
 })

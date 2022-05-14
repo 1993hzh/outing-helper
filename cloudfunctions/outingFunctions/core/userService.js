@@ -37,7 +37,7 @@ class UserService extends BaseService {
     });
   }
 
-  async listPendingUsers({ building: building, status: status }) {
+  async listUsers({ building: building, status: status }) {
     if (building === undefined || status === undefined) {
       return;
     }
@@ -48,16 +48,13 @@ class UserService extends BaseService {
       throw new BizError('只能查看自己管理的楼栋数据');
     }
 
+    const residenceKey = status === 1 ? "residence" : "pending.data.residence";
     return await this.findBy({
       criteria: {
-        pending: {
-          status: status,
-          data: {
-            residence: {
-              building: {
-                id: building
-              }
-            }
+        "pending.status": status,
+        [residenceKey]: {
+          building: {
+            id: building
           }
         }
       },
@@ -147,8 +144,7 @@ class UserService extends BaseService {
 
     const pendingData = user.pending.data;
     const pendingResidence = pendingData.residence;
-    const certs = await this.certificateService.findByResidence(pendingResidence)
-    let certificate = certs[0];
+    const certificate = await this.certificateService.findByResidence(pendingResidence)
     if (!certificate) {
       console.error(`Cannot find cert for residence: ${JSON.stringify(pendingResidence)}`);
       throw new Error(`Cannot find cert for residence: ${pendingResidence._id}`);

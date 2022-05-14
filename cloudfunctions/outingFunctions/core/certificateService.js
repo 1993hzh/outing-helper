@@ -40,7 +40,7 @@ class CertificateService extends BaseService {
       throw new Error(`Invalid residence: ${JSON.stringify(residence)} to find certificate.`);
     }
 
-    return await this.findBy({
+    const result = await this.findBy({
       criteria: {
         residence: {
           _id: residence._id
@@ -51,6 +51,26 @@ class CertificateService extends BaseService {
       ],
       limit: 1
     });
+
+    if (result.length <= 0) {
+      console.warn(`Cannot find certificate for residence: ${JSON.stringify(residence)}`);
+    }
+    return result[0];
+  }
+
+  async toggle(certificate) {
+    if (!certificate) {
+      throw new Error('Certificate not found.');
+    }
+
+    const user = this.context.user;
+    const managedBuildings = user.managed_buildings || [];
+    if (!user.role.superAdmin && !managedBuildings.find(e => e.id === certificate.residence.building.id)) {
+      throw new BizError('只能操作自己管理的楼栋数据');
+    }
+
+    const status = 1 - certificate.status;
+    return await this.update(certificate, { status: status });
   }
 
   async certify(residence) {
