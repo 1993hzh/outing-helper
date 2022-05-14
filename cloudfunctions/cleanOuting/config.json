@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "openapi": [
+    ]
+  },
+  "triggers": [
+    {
+      "name": "cleanOuting",
+      "type": "timer",
+      "config": "0 0 2 * * MON *"
+    }
+  ]
+}
