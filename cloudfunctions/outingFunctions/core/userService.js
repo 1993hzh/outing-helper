@@ -142,6 +142,11 @@ class UserService extends BaseService {
       throw new Error('Invalid user for approval.', JSON.stringify(user));
     }
 
+    const auditer = this.context.user;
+    if (!auditer.role.superAdmin && auditer._id === user._id) {
+      throw new BizError('不可以审核自己的出行信息，请联系管理员');
+    }
+
     const pendingData = user.pending.data;
     const pendingResidence = pendingData.residence;
     const certificate = await this.certificateService.findByResidence(pendingResidence)
@@ -158,6 +163,11 @@ class UserService extends BaseService {
   async rejectUserProfile({ user: user, reason: reason }) {
     if (!user || !user.pending || !user.pending.data || user.pending.status !== 0) {
       throw new Error('Invalid user for approval.', JSON.stringify(user));
+    }
+
+    const auditer = this.context.user;
+    if (!auditer.role.superAdmin && auditer._id === user._id) {
+      throw new BizError('不可以审核自己的出行信息，请联系管理员');
     }
 
     return await this.update(user, {
