@@ -39,7 +39,7 @@ class CheckRecordService extends BaseService {
     const thisMonday = moment()
       .weekday(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
       .toDate();
-    return await this.findBy({
+    const checkRecords = await this.findBy({
       criteria: {
         certificate: {
           _id: certificate_id
@@ -50,6 +50,11 @@ class CheckRecordService extends BaseService {
         { prop: 'created_at', type: 'asc' }
       ],
     });
+    const certificate = await this.certificateService.findById(certificate_id);
+    return {
+      certificate: certificate,
+      checkRecords: checkRecords
+    };
   }
 
   async findLastOutRecord(certificate_id) {

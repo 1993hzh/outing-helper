@@ -11,8 +11,8 @@ Page({
 
   data: {
     showCheckPopup: false,
-    certificate_id: undefined,
-    checkRecord: undefined,
+    certificate_id: '',
+    checkRecord: {},
   },
 
   onLoad(options) {
@@ -116,8 +116,8 @@ Page({
   onClosePopup() {
     this.setData({
       showCheckPopup: false,
-      certificate_id: undefined,
-      checkRecord: undefined
+      certificate_id: '',
+      checkRecord: {}
     });
   },
 

@@ -91,7 +91,12 @@ Page({
         args: certId
       },
       action: async (result) => {
-        const checkRecords = result.data;
+        const data = result.data;
+        const certificate = data.certificate;
+        const checkRecords = data.checkRecords;
+
+        app.globalData.loginUser.certificate = certificate;
+        this.getTabBar().refreshOutingCount(certificate);
         this.processCheckRecord(checkRecords);
         this.setData({
           checkRecords: checkRecords,

@@ -93,6 +93,12 @@ Component({
       });
     },
 
+    refreshOutingCount(certificate) {
+      this.setData({
+        'list[1].info': certificate?.outing_count,
+      });
+    },
+
     adjustBarByUser() {
       // check user role
       const loginUser = app.globalData.loginUser;
