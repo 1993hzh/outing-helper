@@ -76,6 +76,11 @@ Page({
   },
 
   onClickCheckIn(event) {
+    wx.reportEvent("daily_trend", {
+      "check_type": 1,
+      "check_status": 0
+    })
+
     functionTemplate.send({
       message: '检入中，请稍后...',
       errorMessage: '检入发生错误，请联系管理员',
@@ -90,11 +95,27 @@ Page({
         this.setData({
           checkRecord: checkRecord,
         });
+
+        wx.reportEvent("daily_trend", {
+          "check_type": 1,
+          "check_status": 1
+        })
+      },
+      errorHandler: (error) => {
+        wx.reportEvent("daily_trend", {
+          "check_type": 1,
+          "check_status": error instanceof BizError ? -10 : -1
+        })
       },
     });
   },
 
   onClickCheckOut(event) {
+    wx.reportEvent("daily_trend", {
+      "check_type": 0,
+      "check_status": 0
+    })
+
     functionTemplate.send({
       message: '检出中，请稍后...',
       errorMessage: '检出发生错误，请联系管理员',
@@ -109,6 +130,17 @@ Page({
         this.setData({
           checkRecord: checkRecord,
         });
+
+        wx.reportEvent("daily_trend", {
+          "check_type": 0,
+          "check_status": 1
+        })
+      },
+      errorHandler: (error) => {
+        wx.reportEvent("daily_trend", {
+          "check_type": 0,
+          "check_status": error instanceof BizError ? -10 : -1
+        })
       },
     });
   },

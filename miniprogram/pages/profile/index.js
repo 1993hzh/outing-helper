@@ -310,6 +310,7 @@ Page({
 
   onConsentClick() {
     const _this = this;
+    Toast.loading({ message: '正在打开...', duration: 2000, forbidClick: true, });
     wx.cloud.downloadFile({
       fileID: 'cloud://cloud1-9ggmda0qb8fc88af.636c-cloud1-9ggmda0qb8fc88af-1311685783/consent.pdf',
       success: function (resp) {
@@ -325,7 +326,10 @@ Page({
           fail: function(err) {
             Toast.fail('打开失败');
             logger.error(err);
-          }
+          },
+          complete: function() {
+            Toast.clear();
+          },
         })
       },
       fail: function(err) {
