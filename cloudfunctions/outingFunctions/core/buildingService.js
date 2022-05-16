@@ -59,6 +59,7 @@ class BuildingService {
     { id: 58, name: "58号" },
     { id: 59, name: "348号" },
     { id: 60, name: "350号" },
+    { id: 61, name: "53号乙" },
   ];
 
   #INDEXED_BUILDINGS = new Map();
@@ -74,8 +75,8 @@ class BuildingService {
   }
 
   async list() {
-    return [];
-    // return this.#BUILT_IN;
+    // return [];
+    return this.#BUILT_IN;
   }
 }
 

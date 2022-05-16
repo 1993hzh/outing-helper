@@ -32,7 +32,8 @@ class UserService extends BaseService {
     return await this.findBy({
       criteria: criteria,
       orderBy: [
-        { prop: 'created_at', type: 'asc' }
+        { prop: 'residence.building.id', type: 'asc' },
+        { prop: 'residence.room', type: 'asc' }
       ],
     });
   }
@@ -59,7 +60,7 @@ class UserService extends BaseService {
         }
       },
       orderBy: [
-        { prop: 'created_at', type: 'asc' }
+        { prop: `${residenceKey}.room`, type: 'asc' }
       ],
     });
   }
@@ -178,7 +179,8 @@ class UserService extends BaseService {
 
   async findByCertificate(certificate_id) {
     if (!certificate_id) {
-      throw new Error('Found empty certificate id.');
+      console.warn('Found empty certificate id.');
+      return;
     }
 
     return await this.findBy({
