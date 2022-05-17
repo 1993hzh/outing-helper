@@ -8,9 +8,9 @@
 }
 
 .certificate-info {
-  font-size: 36rpx;
+  font-size: 48rpx;
   font-weight: bold;
   /* color: #ed3f14; */
-  color: #ff9900;
+  color: #19be6b;
   margin-bottom: 50rpx;
 }

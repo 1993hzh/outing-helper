@@ -80,11 +80,11 @@ class BaseService {
       .where({ _id: record_id, revision: record_revision })
       .update({ data: partial });
     if (updateResult.stats.updated <= 0) {
-      console.error(
+      console.warn(
         `Possible optimistic lock exception: updating record: { id: ${record_id}, revision: ${record_revision} } failed.`
-        , JSON.stringify(updateResult)
+        , JSON.stringify(record), JSON.stringify(updateResult)
       );
-      throw new Error(`Possible optimistic lock exception: update record: ${JSON.stringify(record)}failed.`);
+      throw new BizError('更新出错，请刷新重试');
     }
 
     const result = { ...record, ...partial };

@@ -1,0 +1,25 @@
+module.exports = {
+  desensitizeName: function (name) {
+    if (!name) {
+      return '';
+    }
+
+    if (name.length == 2) {
+      return name.substring(0, 1) + '*'
+    } else if (name.length == 3) {
+      return name.substring(0, 1) + '*' + name.substring(2, 3)
+    } else if (name.length > 3) {
+      return name.substring(0, 1) + '*' + '*' + name.substring(3, name.length)
+    }
+  },
+
+  desensitizePhone: function (phone) {
+    if (!tel) return tel;
+    var phone = tel.replace(tel.substring(3, 7), '****')
+    return phone
+  },
+
+  formatDate: function (date) {
+    return getDate(date).toLocaleString('zh-CN');
+  },
+};

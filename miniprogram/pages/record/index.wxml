@@ -1,3 +1,5 @@
+<wxs module="util" src="../../utils/util.wxs" />
+
 <van-toast id="van-toast" />
 
 <van-dropdown-menu>
@@ -32,9 +34,9 @@
         </view>
         <view slot="label">
           <van-icon name="clock-o" />
-          <text>{{item.out.checked_at}}</text>
+          <text>{{util.formatDate(item.out.checked_at)}}</text>
         </view>
-        <text>检查人：{{item.out.checked_by.name}}</text>
+        <text>检查人：{{util.desensitizeName(item.out.checked_by.name)}}</text>
       </van-cell>
       <van-cell wx:if="{{item.in.checked_at}}" center use-label-slot size="large">
         <view slot="title" class="custom-cell-title">
@@ -46,9 +48,9 @@
         </view>
         <view slot="label">
           <van-icon name="clock-o" />
-          <text>{{item.in.checked_at}}</text>
+          <text>{{util.formatDate(item.in.checked_at)}}</text>
         </view>
-        <text>检查人：{{item.in.checked_by.name}}</text>
+        <text>检查人：{{util.desensitizeName(item.in.checked_by.name)}}</text>
       </van-cell>
     </van-cell-group>
 </scroll-view>

@@ -1,6 +1,7 @@
 // pages/check/index.js
 import * as logger from '../../utils/log';
 import Toast from '@vant/weapp/toast/toast';
+import Dialog from '@vant/weapp/dialog/dialog';
 import BizError from '../../utils/bizError';
 import functionTemplate from '../../utils/functionTemplate';
 
@@ -10,6 +11,8 @@ const queryString = require('query-string');
 Page({
 
   data: {
+    showAlertSuccess: false,
+    showAlertFail: false,
     showCheckPopup: false,
     certificate_id: '',
     checkRecord: {},
@@ -91,9 +94,9 @@ Page({
       },
       action: (result) => {
         const checkRecord = result.data;
-        this.processCheckRecord(checkRecord);
         this.setData({
           checkRecord: checkRecord,
+          showAlertSuccess: true,
         });
 
         wx.reportEvent("daily_trend", {
@@ -126,9 +129,9 @@ Page({
       },
       action: (result) => {
         const checkRecord = result.data;
-        this.processCheckRecord(checkRecord);
         this.setData({
           checkRecord: checkRecord,
+          showAlertSuccess: true,
         });
 
         wx.reportEvent("daily_trend", {
@@ -168,7 +171,6 @@ Page({
       },
       action: async (result) => {
         const checkRecords = result.data;
-        this.processCheckRecord(checkRecords[0]);
         this.setData({
           certificate_id: certId,
           checkRecord: checkRecords[0],
@@ -177,15 +179,4 @@ Page({
       },
     });
   },
-
-  processCheckRecord(record) {
-    const outDateTime = record?.out?.checked_at;
-    if (outDateTime) {
-      record.out.checked_at = new Date(outDateTime).toLocaleString('zh-CN');
-    }
-    const inDateTime = record?.in?.checked_at;
-    if (inDateTime) {
-      record.in.checked_at = new Date(inDateTime).toLocaleString('zh-CN');
-    }
-  }
 })

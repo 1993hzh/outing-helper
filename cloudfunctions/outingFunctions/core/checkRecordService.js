@@ -36,9 +36,7 @@ class CheckRecordService extends BaseService {
       throw new BizError('用户非法访问他人出入记录.');
     }
 
-    const thisMonday = moment()
-      .weekday(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-      .toDate();
+    const thisMonday = moment().startOf('week').toDate();
     const checkRecords = await this.findBy({
       criteria: {
         certificate: {
@@ -62,19 +60,18 @@ class CheckRecordService extends BaseService {
       throw new BizError('出入证不存在');
     }
 
-    const thisMonday = moment()
-      .weekday(0).set({ hour: 0, minute: 0, second: 0, millisecond: 0 })
-      .toDate();
+    const today = moment().startOf('day').toDate();
     return await this.findBy({
       criteria: {
         certificate: {
           _id: certificate_id
         },
-        status: 0,
-        created_at: _.gte(thisMonday),
+        out: {
+          checked_at: _.gte(today),
+        },
       },
       orderBy: [
-        { prop: 'created_at', type: 'desc' }
+        { prop: 'out.checked_at', type: 'desc' }
       ],
       limit: 1,
     });
@@ -83,6 +80,11 @@ class CheckRecordService extends BaseService {
   async checkOut(certId) {
     if (!certId) {
       throw new BizError('出入证不存在');
+    }
+
+    const lastOut = await this.findLastOutRecord(certId);
+    if (lastOut && lastOut._id) {
+      throw new BizError('每日限出行一次');
     }
 
     const certificate = await this.certificateService.findById(certId);

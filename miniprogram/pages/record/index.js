@@ -51,11 +51,16 @@ Page({
   initDropDown() {
     const defaultUserOption = [{ text: '全部住户', value: -1 }];
     const user = app.globalData.loginUser;
+    const certId = user.certificate?._id;
+    if (!certId) {
+      return;
+    }
+
     functionTemplate.send({
       request: {
         service: 'userService',
         method: 'findByCertificate',
-        args: user?.certificate?._id,
+        args: user.certificate._id,
       },
       action: async (result) => {
         const users = result.data;
@@ -97,7 +102,6 @@ Page({
 
         app.globalData.loginUser.certificate = certificate;
         this.getTabBar().refreshOutingCount(certificate);
-        this.processCheckRecord(checkRecords);
         this.setData({
           checkRecords: checkRecords,
           isRefreshing: false
@@ -105,18 +109,4 @@ Page({
       },
     });
   },
-
-  processCheckRecord(records) {
-    records.forEach(record => {
-      const outDateTime = record.out?.checked_at;
-      if (outDateTime) {
-        record.out.checked_at = new Date(outDateTime).toLocaleString('zh-CN');
-      }
-      const inDateTime = record.in?.checked_at;
-      if (inDateTime) {
-        record.in.checked_at = new Date(inDateTime).toLocaleString('zh-CN');
-      }
-    });
-    return records;
-  }
 })

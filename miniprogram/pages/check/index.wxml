@@ -1,4 +1,7 @@
+<wxs module="util" src="../../utils/util.wxs" />
+
 <van-toast id="van-toast" />
+<van-dialog id="van-dialog" />
 <!-- scan part -->
 <view>
     <van-empty description="扫描出入证二维码" />
@@ -14,7 +17,7 @@
   z-index="99999"
   safe-area-inset-top>
     <!-- records part -->
-    <van-cell-group wx:if="{{ checkRecord }}" title="最近一次外出记录">
+    <van-cell-group wx:if="{{ checkRecord }}" title="今日外出记录">
       <van-cell wx:if="{{checkRecord.out.checked_at}}" center use-label-slot size="large">
         <view slot="title" class="custom-cell-title">
           <van-tag type="danger" class="custom-title-tag">出</van-tag>
@@ -25,7 +28,7 @@
         </view>
         <view slot="label">
           <van-icon name="clock-o" />
-          <text>{{checkRecord.out.checked_at}}</text>
+          <text>{{util.formatDate(checkRecord.out.checked_at)}}</text>
         </view>
         <text>检查人：{{checkRecord.out.checked_by.name}}</text>
       </van-cell>
@@ -39,7 +42,7 @@
         </view>
         <view slot="label">
           <van-icon name="clock-o" />
-          <text>{{checkRecord.in.checked_at}}</text>
+          <text>{{util.formatDate(checkRecord.in.checked_at)}}</text>
         </view>
         <text>检查人：{{checkRecord.in.checked_by.name}}</text>
       </van-cell>
@@ -51,7 +54,7 @@
           type="primary"
           icon="wap-home"
           round
-          disabled="{{!checkRecord || checkRecord.in.checked_at}}"
+          disabled="{{!checkRecord._id || checkRecord.in.checked_at}}"
           bind:click="onClickCheckIn">
           进
         </van-button>
@@ -60,9 +63,28 @@
           type="danger"
           icon="shopping-cart"
           round
-          disabled="{{checkRecord && checkRecord.out.checked_at}}"
+          disabled="{{checkRecord._id && checkRecord.out.checked_at}}"
           bind:click="onClickCheckOut">
           出
         </van-button>
     </view>
 </van-popup>
+<!-- alert -->
+<van-dialog
+  title="允许通行"
+  class="alert-dialog"
+  use-slot
+  close-on-click-overlay
+  z-index="1000000"
+  show="{{ showAlertSuccess }}">
+  <image class="alert-icon" src="../../images/success.png" mode="aspectFit" />
+</van-dialog>
+<van-dialog
+  title="禁止通行"
+  class="alert-dialog"
+  use-slot
+  close-on-click-overlay
+  z-index="1000000"
+  show="{{ showAlertFail }}">
+  <image class="alert-icon" src="../../images/fail.png" mode="aspectFit" />
+</van-dialog>
